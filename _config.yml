@@ -1,22 +1,26 @@
 # ── Site Settings ──
-title: 九原山
-email: ninehills@users.noreply.github.com
-author: ninehills
+title: 破晓
+email: 308211478+sailorlab@users.noreply.github.com
+author: sailorlab
 description: >-
-  技术笔记与思考。关注大语言模型、AI Agent、推理优化、SRE 等领域。
+  设计·随笔，生活杂录。
 url: "https://sailorlab.github.io"
 baseurl: "/blog"
+language: zh-CN
 
-# ── Permalink ──
+# ── Permalink 文章链接规则 ──
 permalink: /:year/:month/:day/:slug/
 
-# ── Plugins ──
+# ── 分页配置（PaperMod必须） ──
+paginate: 10
+paginate_path: "/page/:num/"
+
+# ── Plugins Github Pages白名单内插件 ──
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
   - jekyll-sitemap
   - jekyll-paginate
-  - jekyll-spaceship
 
 # ── Build ──
 markdown: kramdown
@@ -24,6 +28,7 @@ kramdown:
   input: GFM
   syntax_highlighter: rouge
 
+# 排除不需要参与构建的文件
 exclude:
   - generate.py
   - articles/
@@ -31,11 +36,41 @@ exclude:
   - Gemfile.lock
   - vendor/
 
-# ── Jekyll Spaceship Configuration ──
-jekyll-spaceship:
-  mathjax-processor:
-    src:
-      - "https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"
-  mermaid-processor:
-    src:
-      - "https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"
+# ── PaperMod 主题基础配置 ──
+theme: minima # 如果是源码部署，删掉这一行；Gem主题保留
+# 开启文章目录、搜索、归档等功能
+params:
+  env: production # production / development
+  titleMode: normal
+  defaultTheme: auto # auto / light / dark
+  disableThemeToggle: false
+  ShowReadingTime: true
+  ShowPostNavLinks: true
+  ShowBreadCrumbs: true
+  ShowCodeCopyButtons: true
+  ShowWordCount: true
+  ShowRssButtonInSectionTermList: true
+  useHugoToc: true
+  disableSpecial1stPost: false
+  disableScrollToTop: false
+  comments: false # 后面想加评论（Giscus）再打开
+  hidemeta: false
+  hideSummary: false
+  showtoc: true
+  tocopen: false
+
+# 导航菜单
+menu:
+  main:
+    - name: 首页
+      url: /
+      weight: 1
+    - name: 归档
+      url: /archives/
+      weight: 2
+    - name: 标签
+      url: /tags/
+      weight: 3
+    - name: 关于
+      url: /about/
+      weight: 4
