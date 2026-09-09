@@ -1,0 +1,45 @@
+{%- assign url_segments = page.url | split: '/' -%}
+{%- assign relative_depth = url_segments.size | minus: 1 -%}
+{%- assign relative_prefix = "" -%}
+{%- if relative_depth > 0 -%}
+  {%- for i in (1..relative_depth) -%}
+    {%- assign relative_prefix = relative_prefix | append: "../" -%}
+  {%- endfor -%}
+{%- endif -%}<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% seo %}
+  <link rel="stylesheet" href="{{ relative_prefix }}assets/css/style.css">
+  <link rel="alternate" type="application/rss+xml" title="{{ site.title }} - RSS Feed" href="{{ relative_prefix }}feed.xml">
+</head>
+<body>
+  <header class="header">
+    <div class="container header-container">
+      <a href="{{ relative_prefix }}" class="site-title">{{ site.title }}</a>
+      <nav class="nav">
+        <a href="{{ relative_prefix }}">文章</a>
+        <a href="https://github.com/ninehills" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    {{ content }}
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-container">
+      <p class="footer-desc">{{ site.description }}</p>
+      <p class="footer-meta">
+        <span>© {{ 'now' | date: '%Y' }} {{ site.author }}</span>
+        <span class="divider">·</span>
+        <a href="{{ relative_prefix }}feed.xml">RSS 订阅</a>
+        <span class="divider">·</span>
+        <a href="https://github.com/ninehills/blog" target="_blank" rel="noopener noreferrer">源码</a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>

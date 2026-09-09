@@ -1,0 +1,41 @@
+# ── Site Settings ──
+title: 九原山
+email: ninehills@users.noreply.github.com
+author: ninehills
+description: >-
+  技术笔记与思考。关注大语言模型、AI Agent、推理优化、SRE 等领域。
+baseurl: ""
+url: "https://ninehills.tech"
+
+# ── Permalink ──
+permalink: /:year/:month/:day/:slug/
+
+# ── Plugins ──
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-paginate
+  - jekyll-spaceship
+
+# ── Build ──
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+exclude:
+  - generate.py
+  - articles/
+  - README.md
+  - Gemfile.lock
+  - vendor/
+
+# ── Jekyll Spaceship Configuration ──
+jekyll-spaceship:
+  mathjax-processor:
+    src:
+      - "https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"
+  mermaid-processor:
+    src:
+      - "https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"
