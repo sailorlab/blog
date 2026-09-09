@@ -4,8 +4,8 @@ email: ninehills@users.noreply.github.com
 author: ninehills
 description: >-
   技术笔记与思考。关注大语言模型、AI Agent、推理优化、SRE 等领域。
-baseurl: ""
-url: "https://ninehills.tech"
+url: "https://sailorlab.github.io"
+baseurl: "/blog"
 
 # ── Permalink ──
 permalink: /:year/:month/:day/:slug/
