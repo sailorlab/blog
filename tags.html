@@ -1,0 +1,18 @@
+---
+layout: page
+title: 标签集合
+permalink: /tags/
+---
+
+<h2>所有标签</h2>
+
+{% assign tags = site.tags | sort %}
+{% for tag in tags %}
+<h3># {{ tag[0] }}</h3>
+<ul>
+  {% for post in tag[1] %}
+  <li><a href="{{ post.url }}">{{ post.title }}</a></li>
+  {% endfor %}
+</ul>
+{% endfor %}
+<!-- （注：内容由AI生成） -->

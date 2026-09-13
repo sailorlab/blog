@@ -209,28 +209,51 @@ body {
   margin: 1rem auto; /* 上下外边距，图片居中 */
 }
 
+/* ========== 顶部导航样式 ========== */
 .site-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 0;
-  border-bottom: 1px solid #eee;
-  margin-bottom:2rem;
+  padding: 18px 0;
+  border-bottom: 1px solid #e5e5e5;
+  margin-bottom: 2rem;
 }
 .site-title {
-  font-size:22px;
-  font-weight:bold;
-  text-decoration:none;
-  color:#000;
+  font-size: 24px;
+  font-weight: 700;
+  text-decoration: none;
+  color: #111;
 }
-.nav a {
-  margin-left:24px;
-  text-decoration:none;
-  color:#444;
+.main-nav a {
+  margin-left: 26px;
+  text-decoration: none;
+  color: #444;
+  font-size: 16px;
 }
-.nav a:hover{
-  color:#000;
+.main-nav a:hover {
+  color: #000;
+  text-decoration: underline;
 }
+
+/* ========== 归档、标签页面美化 ========== */
+.page-content h2 {
+  margin-bottom: 1.2rem;
+}
+.page-content h3 {
+  margin-top:1.6rem;
+  margin-bottom:0.6rem;
+}
+.page-content ul {
+  padding-left: 1.2rem;
+}
+.page-content li {
+  padding:4px 0;
+}
+.page-content li span {
+  color:#777;
+  margin-right: 8px;
+}
+
 
 /* Post Layout Container (3-Column Grid for Perfect Centering) */
 .post-layout-container {
