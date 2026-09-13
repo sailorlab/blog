@@ -201,6 +201,15 @@ body {
   }
 }
 
+/* 文章内容里图片自适应 */
+.post-content img {
+  max-width: 100%;   /* 最大不超过父容器宽度 */
+  height: auto;      /* 高度自动，防止图片拉伸变形 */
+  display: block;    /* 消除图片底部多余缝隙 */
+  margin: 1rem auto; /* 上下外边距，图片居中 */
+}
+
+
 /* Post Layout Container (3-Column Grid for Perfect Centering) */
 .post-layout-container {
   display: grid;
