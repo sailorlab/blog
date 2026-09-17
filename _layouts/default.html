@@ -15,15 +15,20 @@
   <link rel="alternate" type="application/rss+xml" title="{{ site.title }} - RSS Feed" href="{{ relative_prefix }}feed.xml">
 </head>
 <body>
-  <header class="header">
-    <div class="container header-container">
-      <a href="{{ relative_prefix }}" class="site-title">{{ site.title }}</a>
-      <nav class="nav">
-        <a href="{{ relative_prefix }}">文章</a>
-        <a href="https://github.com/ninehills" target="_blank" rel="noopener noreferrer">GitHub</a>
-      </nav>
-    </div>
-  </header>
+<header class="header">
+  <div class="container header-container">
+    <a href="{{ site.baseurl }}/" class="site-title">
+      <img src="{{ site.baseurl }}/assets/images/308211478.jpg" alt="头像" style="height:48px;">
+    </a>
+    <nav class="nav">
+      <a href="{{ site.baseurl }}/">首页</a>
+      <a href="{{ site.baseurl }}/archives/">归档</a>
+      <a href="{{ site.baseurl }}/tags/">标签</a>
+      <a href="{{ site.baseurl }}/about/">关于</a>
+      <a href="https://github.com/sailorlab" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </nav>
+  </div>
+</header>
 
   <main class="main">
     {{ content }}
