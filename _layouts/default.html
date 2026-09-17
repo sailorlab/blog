@@ -20,11 +20,53 @@
     <a href="{{ site.baseurl }}/" class="site-title" style="width:40px;height:40px;display:block;overflow:hidden;">
     <img src="{{ site.baseurl }}/assets/images/308211478.jpg" alt="头像" style="height:40px;width:40px;border-radius:50%;object-fit:cover;">
     </a>
-<nav class="nav" style="margin-left:auto;">
-  <a href="{{ site.baseurl }}/categories/life/">关于生活</a>
-  <a href="{{ site.baseurl }}/categories/work/">工作及其他</a>
-  <a href="{{ site.baseurl }}/categories/hobby/">一点兴趣</a>
-  <a href="https://github.com/sailorlab" target="_blank" rel="noopener noreferrer">Github</a>
+<nav class="nav" style="margin-left:auto;display:flex;gap:24px;align-items:center;">
+
+{% assign now = "now" | date: "%s" %}
+
+{% assign life_posts = site.posts | where_exp:"item","item.category == 'life'" %}
+{% assign life_new = false %}
+{% for p in life_posts %}
+  {% assign p_time = p.date | date:"%s" %}
+  {% assign diff = now | minus:p_time %}
+  {% if diff < 604800 %}{% assign life_new = true %}{% endif %}
+{% endfor %}
+<a href="{{ site.baseurl }}/categories/life/" style="position:relative;padding-left:12px;">
+  {% if life_new %}
+  <span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
+  {% endif %}
+  关于生活
+</a>
+
+{% assign work_posts = site.posts | where_exp:"item","item.category == 'work'" %}
+{% assign work_new = false %}
+{% for p in work_posts %}
+  {% assign p_time = p.date | date:"%s" %}
+  {% assign diff = now | minus:p_time %}
+  {% if diff < 604800 %}{% assign work_new = true %}{% endif %}
+{% endfor %}
+<a href="{{ site.baseurl }}/categories/work/" style="position:relative;padding-left:12px;">
+  {% if work_new %}
+  <span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
+  {% endif %}
+  工作及其他
+</a>
+
+{% assign hobby_posts = site.posts | where_exp:"item","item.category == 'hobby'" %}
+{% assign hobby_new = false %}
+{% for p in hobby_posts %}
+  {% assign p_time = p.date | date:"%s" %}
+  {% assign diff = now | minus:p_time %}
+  {% if diff < 604800 %}{% assign hobby_new = true %}{% endif %}
+{% endfor %}
+<a href="{{ site.baseurl }}/categories/hobby/" style="position:relative;padding-left:12px;">
+  {% if hobby_new %}
+  <span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
+  {% endif %}
+  一点兴趣
+</a>
+
+<a href="https://github.com/sailorlab" target="_blank" rel="noopener noreferrer">Github</a>
 </nav>
   </div>
 </header>
