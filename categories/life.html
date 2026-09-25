@@ -3,13 +3,6 @@ layout: page
 title: 关于生活
 permalink: /categories/life/
 ---
-<style>
-/* 取消标题居中，设置左边距，和container内文字对齐 */
-h1:first-of-type {
-  text-align: unset;
-  margin-left: calc(120px);
-}
-</style>
 {% assign posts = site.posts | where_exp:"item","item.category == 'life'" %}
 
 <div class="container">
