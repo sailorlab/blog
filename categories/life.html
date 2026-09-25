@@ -1,5 +1,6 @@
 ---
 layout: page
+title: 关于生活
 permalink: /categories/life/
 ---
 {% assign posts = site.posts | where_exp:"item","item.category == 'life'" %}
@@ -16,6 +17,7 @@ permalink: /categories/life/
             <time>{{ post.date | date:"%Y-%m-%d" }}</time> &nbsp;
             <a href="{{ post.url }}">{{ post.title }}</a>
         </h2>
+        <hr>
     </div>
     {% endfor %}
 </div>
