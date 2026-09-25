@@ -3,11 +3,16 @@ layout: page
 title: 关于生活
 permalink: /categories/life/
 ---
+<style>
+/* 让page布局自带的标题居中 */
+h1.page-title {
+  text-align: center;
+}
+</style>
 {% assign posts = site.posts | where_exp:"item","item.category == 'life'" %}
 
 <div class="container">
 <div class="home-intro">
-<h1>{{ page.title }}</h1>
 <p>生活随笔与日常记录</p>
 </div>
 <div class="posts-timeline">
