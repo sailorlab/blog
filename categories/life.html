@@ -16,6 +16,7 @@ h1:first-of-type {
 .post-item h2 time {
   color: #666; /*日期灰色，可改 #333黑色 */
   font-size: 14.4px;
+  font-weight: 500;
 }
 /* 文章标题链接 */
 .post-item h2 a {
@@ -27,6 +28,9 @@ h1:first-of-type {
 .post-item h2 a:hover {
   color: #0066cc;
   text-decoration: none; 
+}
+.post-content h2 {
+  padding-bottom: 1rem;
 }
 </style>
 {% assign posts = site.posts | where_exp:"item","item.category == 'life'" %}
