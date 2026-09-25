@@ -26,6 +26,7 @@ h1:first-of-type {
 /* hover鼠标悬浮时标题变色 */
 .post-item h2 a:hover {
   color: #0066cc;
+  text-decoration: none; 
 }
 </style>
 {% assign posts = site.posts | where_exp:"item","item.category == 'life'" %}
