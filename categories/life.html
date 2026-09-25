@@ -4,9 +4,10 @@ title: 关于生活
 permalink: /categories/life/
 ---
 <style>
-/* 本页面的第一个h1标题居中 */
+/* 取消标题居中，设置左边距，和container内文字对齐 */
 h1:first-of-type {
-  text-align: center;
+  text-align: unset;
+  margin-left: calc(120px);
 }
 </style>
 {% assign posts = site.posts | where_exp:"item","item.category == 'life'" %}
