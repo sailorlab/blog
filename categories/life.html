@@ -3,6 +3,12 @@ layout: page
 title: 关于生活
 permalink: /categories/life/
 ---
+<style>
+/* 隐藏页面外层自动生成的标题 */
+h1:first-of-type {
+  display: none;
+}
+</style>
 {% assign posts = site.posts | where_exp:"item","item.category == 'life'" %}
 
 <div class="container">
@@ -16,6 +22,7 @@ permalink: /categories/life/
             <time>{{ post.date | date:"%Y-%m-%d" }}</time> &nbsp;
             <a href="{{ post.url }}">{{ post.title }}</a>
         </h2>
+        <hr>
     </div>
     {% endfor %}
 </div>
