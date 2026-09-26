@@ -1,52 +1,51 @@
 ---
-layout: page
+layout: default
 title: 关于生活
 permalink: /categories/life/
 ---
 <style>
 /* 隐藏页面外层自动生成的标题 */
 h1:first-of-type {
-  display: none;
+display: none;
 }
 /* 文章条目容器 */
 .post-item h2 {
-  font-size: 16.8px; /* 标题整体字号 */
+font-size: 16.8px; /* 标题整体字号 */
 }
 /* 日期部分 */
 .post-item h2 time {
-  color: #666; /*日期灰色，可改 #333黑色 */
-  font-size: 14.4px;
-  font-weight: 500;
+color: #666; /*日期灰色，可改 #333黑色 */
+font-size: 14.4px;
+font-weight: 500;
 }
 /* 文章标题链接 */
 .post-item h2 a {
-  color: #222; /*标题文字颜色 */
-  text-decoration: none; /*取消下划线，想要下划线删掉这行*/
-  font-size: 16.8px;
+color: #222; /*标题文字颜色 */
+text-decoration: none; /*取消下划线，想要下划线删掉这行*/
+font-size: 16.8px;
 }
 /* hover鼠标悬浮时标题变色 */
 .post-item h2 a:hover {
-  color: #0066cc;
-  text-decoration: none; 
+color: #0066cc;
+text-decoration: none; 
 }
 .post-content h2 {
-  padding-bottom: 1rem;
+padding-bottom: 1rem;
 }
 </style>
 {% assign posts = site.posts | where_exp:"item","item.category == 'life'" %}
-
 <div class="container">
 <div class="home-intro">
 <p>生活随笔与日常记录</p>
 </div>
 <div class="posts-timeline">
     {% for post in posts %}
-    <div class="post-item">
-        <h2>
-            <time>{{ post.date | date:"%Y-%m-%d" }}</time> &nbsp;
-            <a href="{{ post.url }}">{{ post.title }}</a>
-        </h2>
-    </div>
+<div class="post-item">
+<h2>
+<time>{{ post.date | date:"%Y-%m-%d" }}</time> &nbsp;
+<a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a>
+</h2>
+</div>
     {% endfor %}
 </div>
 </div>
