@@ -1,0 +1,89 @@
+---
+layout: default
+---
+<style>
+.post-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px 0;
+  border-bottom: 1px solid #e5e5e5;
+  transition: all 0.24s ease;
+}
+.post-card:hover {
+  transform: translateY(-2px);
+}
+.post-card-thumb {
+  width:140px;
+  height:100px;
+  object-fit: cover;
+  border-radius:8px;
+  flex-shrink:0;
+}
+.post-card-text {
+  text-align: right;
+  flex: none;
+  padding-top:4px;
+}
+.post-card-date {
+  color:#777;
+  font-size:24px;
+  margin-bottom:8px;
+}
+.post-card-title {
+  font-size:36px;
+  font-weight:500;
+}
+.post-card-title a {
+  color:#222;
+  text-decoration:none;
+}
+.post-card-title a:hover {
+  color:#000;
+  text-decoration: underline;
+}
+.home-intro {
+  margin-bottom:60px;
+}
+/* 移动端适配 */
+@media (max-width:640px) {
+  .post-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .post-card-thumb {
+    width:100%;
+    height:180px;
+  }
+  .post-card-text {
+    text-align:left;
+    padding-top: 8px;
+  }
+}
+</style>
+
+<div class="container">
+<div class="home-intro">
+  <h1>标签：{{ page.tag }}</h1>
+  <p>包含此标签的全部文章</p>
+</div>
+
+<div class="posts-timeline">
+{% assign posts = site.tags[page.tag] %}
+{% for post in posts %}
+<div class="post-card">
+  {% if post.thumbnail %}
+    <img class="post-card-thumb" src="{{ site.baseurl }}{{ post.thumbnail }}" alt="{{ post.title }}">
+  {% elsif post.thumbnail == nil %}
+    <div class="post-card-thumb" style="background:#f5f5f5;"></div>
+  {% endif %}
+  <div class="post-card-text">
+    <div class="post-card-date">{{ post.date | date:"%m-%d" }}</div>
+    <div class="post-card-title">
+      <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a>
+    </div>
+  </div>
+</div>
+{% endfor %}
+</div>
+</div>
