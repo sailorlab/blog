@@ -24,7 +24,7 @@ layout: default
             {% assign post_url_clean = post.url | remove_first: '/' %}
 <li class="timeline-post-item">
 <time class="timeline-post-date" datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%m-%d" }}</time>
-<a class="timeline-post-link" href="{{ relative_prefix }}{{ post_url_clean }}">{{ post.title | escape }}</a>
+<a class="timeline-post-link" href="{{ post.url }}">{{ post.title | escape }}</a>
 <!-- 标题下方分隔细线，适配黑色主题 -->
 <hr style="border:none; border-bottom:1px solid #303030; margin:10px 0 14px 0;">
 </li>
