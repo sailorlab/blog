@@ -16,6 +16,7 @@ layout: default
   flex-wrap: wrap;
   gap:16px;
   margin-top:24px;
+  margin-bottom:40px;
 }
 .tag-item {
   font-size:18px;
@@ -25,11 +26,67 @@ layout: default
   text-decoration: none;
   color:#333;
   transition:0.2s;
+  cursor:pointer;
 }
 .tag-item:hover {
   background:#222;
   color:#fff;
   border-color:#222;
+}
+.post-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px 0;
+  border-bottom: 1px solid #e5e5e5;
+  transition: all 0.24s ease;
+}
+.post-card:hover {
+  transform: translateY(-2px);
+}
+.post-card-thumb {
+  width:140px;
+  height:100px;
+  object-fit: cover;
+  border-radius:8px;
+  flex-shrink:0;
+}
+.post-card-text {
+  text-align: right;
+  flex: none;
+  padding-top:4px;
+}
+.post-card-date {
+  color:#777;
+  font-size:24px;
+  margin-bottom:8px;
+}
+.post-card-title {
+  font-size:36px;
+  font-weight:500;
+}
+.post-card-title a {
+  color:#222;
+  text-decoration:none;
+}
+.post-card-title a:hover {
+  color:#000;
+  text-decoration: underline;
+}
+/* 移动端适配 */
+@media (max-width:640px) {
+  .post-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .post-card-thumb {
+    width:100%;
+    height:180px;
+  }
+  .post-card-text {
+    text-align:left;
+    padding-top: 8px;
+  }
 }
 </style>
 
@@ -41,7 +98,44 @@ layout: default
 
 <div class="tag-cloud">
 {% for tag in site.tags %}
-  <a class="tag-item" href="{{ site.baseurl }}/tags/{{ tag[0] }}/">{{ tag[0] }} <span style="color:#888;">({{ tag[1].size }})</span></a>
+  <span class="tag-item" onclick="showTag('{{ tag[0] }}')">{{ tag[0] }} <span style="color:#888;">({{ tag[1].size }})</span></span>
+{% endfor %}
+  <span class="tag-item" onclick="showTag('all')">全部文章</span>
+</div>
+
+<div class="posts-timeline" id="tag-post-list">
+{% for post in site.posts %}
+<div class="post-card" data-tags="{{ post.tags | join:',' }}">
+  {% if post.thumbnail %}
+    <img class="post-card-thumb" src="{{ site.baseurl }}{{ post.thumbnail }}" alt="{{ post.title }}">
+  {% else %}
+    <div class="post-card-thumb" style="background:#f5f5f5;"></div>
+  {% endif %}
+  <div class="post-card-text">
+    <div class="post-card-date">{{ post.date | date:"%m-%d" }}</div>
+    <div class="post-card-title">
+      <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a>
+    </div>
+  </div>
+</div>
 {% endfor %}
 </div>
 </div>
+
+<script>
+function showTag(targetTag){
+  const allCards = document.querySelectorAll('.post-card');
+  allCards.forEach(card=>{
+    if(targetTag === 'all'){
+      card.style.display = 'flex';
+    }else{
+      const tags = card.dataset.tags.split(',');
+      if(tags.includes(targetTag)){
+        card.style.display = 'flex';
+      }else{
+        card.style.display = 'none';
+      }
+    }
+  })
+}
+</script>
