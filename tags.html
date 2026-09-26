@@ -1,18 +1,30 @@
 ---
-layout: page
-title: 标签集合
+layout: default
+title: 标签
 permalink: /tags/
 ---
-
-<h2>所有标签</h2>
-
+<div class="container">
+<div class="home-intro">
+<h1>{{ page.title }}</h1>
+<p>按标签浏览所有文章</p>
+</div>
+<div class="posts-timeline">
 {% assign tags = site.tags | sort %}
 {% for tag in tags %}
-<h3># {{ tag[0] }}</h3>
-<ul>
-  {% for post in tag[1] %}
-  <li><a href="{{ post.url }}">{{ post.title }}</a></li>
-  {% endfor %}
+  {% assign tag_name = tag[0] %}
+  {% assign tag_posts = tag[1] %}
+<div class="timeline-year-group">
+<h2 class="timeline-year">#{{ tag_name }}</h2>
+<ul class="timeline-posts">
+    {% for post in tag_posts %}
+<li class="timeline-post-item">
+<time class="timeline-post-date" datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%m-%d" }}</time>
+<a class="timeline-post-link" href="{{ site.baseurl }}{{ post.url }}">{{ post.title | escape }}</a>
+<hr style="border:none; border-bottom:1px solid #303030; margin:10px 0 14px 0;">
+</li>
+    {% endfor %}
 </ul>
+</div>
 {% endfor %}
-<!-- （注：内容由AI生成） -->
+</div>
+</div>
