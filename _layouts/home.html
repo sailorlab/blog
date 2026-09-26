@@ -65,7 +65,7 @@ padding-top: 8px;
 <p>{{ site.description }}</p>
 </div>
 <style>
-/* 首页轮播 带圆点指示器 + 自动同步激活圆点 */
+/* 首页无缝轮播 */
 .home-carousel-wrap {
 width: 100%;
 position: relative;
@@ -75,11 +75,11 @@ margin:40px 0 60px;
 }
 .home-carousel {
 display: flex;
-width: 300%;
 transition: transform 0.6s ease;
 }
 .carousel-item {
 width: 100%;
+flex-shrink: 0;
 }
 .carousel-item img {
 width:100%;
@@ -125,8 +125,12 @@ height:220px;
 <div class="carousel-item">
 <img src="https://picsum.photos/id/1018/1600/600" alt="轮播图">
 </div>
+<!-- 无缝关键：复制第一张放在末尾 -->
+<div class="carousel-item">
+<img src="{{ site.baseurl }}/assets/images/banner1.jpg" alt="轮播图">
 </div>
-<!-- 底部小圆点 -->
+</div>
+<!-- 底部小圆点（只3个，不含复制的那张） -->
 <div class="carousel-dots">
 <span data-index="0" class="active"></span>
 <span data-index="1"></span>
@@ -137,39 +141,77 @@ height:220px;
 const wrap = document.querySelector('.home-carousel-wrap');
 const carousel = wrap.querySelector('.home-carousel');
 const dots = wrap.querySelectorAll('.carousel-dots span');
-const total = dots.length;
+const imgs = wrap.querySelectorAll('.carousel-item img');
+const realTotal = dots.length; //真实图片数量 3张
 let current = 0;
 let timer;
+let isAnimating = false;
+
 // 切换函数
 function goTo(index) {
-current = index;
-carousel.style.transform = `translateX(-${current * 100}%)`;
-dots.forEach(d => d.classList.remove('active'));
-dots[current].classList.add('active');
+  if(isAnimating) return;
+  isAnimating = true;
+  current = index;
+  carousel.style.transform = `translateX(-${current * 100}%)`;
+  //圆点只对应真实3张
+  dots.forEach(d => d.classList.remove('active'));
+  if(current < realTotal){
+    dots[current].classList.add('active');
+  }
+
+  setTimeout(()=>{
+    isAnimating = false;
+    // 滑到复制的第4张，瞬间无动画切回0，实现无缝
+    if(current === realTotal){
+      carousel.style.transition = 'none';
+      current = 0;
+      carousel.style.transform = `translateX(0%)`;
+      // 恢复动画
+      carousel.offsetHeight; //触发重绘
+      carousel.style.transition = 'transform 0.6s ease';
+      dots[0].classList.add('active');
+    }
+  },600);
 }
-// 自动轮播
+
+// 自动轮播，每张停留6秒
 function autoPlay() {
 timer = setInterval(() => {
-current = (current + 1) % total;
-goTo(current);
-  }, 5000);
+    current = current + 1;
+    goTo(current);
+  }, 6000);
 }
+
 // 点击圆点切换
 dots.forEach((dot, idx) => {
 dot.addEventListener('click', () => {
 clearInterval(timer);
 goTo(idx);
-autoPlay(); // 点击后重置计时
+autoPlay();
   });
 });
-// ✅ 鼠标悬停暂停，移开继续播放
+
+// 鼠标悬停暂停，移开继续播放
 wrap.addEventListener('mouseenter', ()=>{
 clearInterval(timer);
 })
 wrap.addEventListener('mouseleave', ()=>{
 autoPlay();
 })
-autoPlay();
+
+// 图片预加载，全部加载完才启动轮播
+let loadedCount = 0;
+imgs.forEach(img => {
+  if(img.complete){
+    loadedCount++;
+    if(loadedCount >= imgs.length) autoPlay();
+  }else{
+    img.onload = () => {
+      loadedCount++;
+      if(loadedCount >= imgs.length) autoPlay();
+    }
+  }
+})
 </script>
 <div class="posts-timeline">
     {% assign postsByYear = site.posts | group_by_exp: "post", "post.date | date: '%Y'" %}
