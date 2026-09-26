@@ -54,6 +54,20 @@
   {% endif %}
   一点兴趣
 </a>
+<!-- ========== 新增【标签集合】，同样带绿点（7天内有新文章就点亮绿点） ========== -->
+{% assign tag_posts = site.posts %}
+{% assign tag_new = false %}
+{% for p in tag_posts %}
+  {% assign p_time = p.date | date:"%s" %}
+  {% assign diff = now | minus:p_time %}
+  {% if diff < 604800 %}{% assign tag_new = true %}{% endif %}
+{% endfor %}
+<a href="{{ site.baseurl }}/tags/" style="position:relative;padding-left:12px;">
+  {% if tag_new %}
+<span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
+  {% endif %}
+  标签集合
+</a>
 <a href="https://github.com/sailorlab" target="_blank" rel="noopener noreferrer">Github</a>
 </nav>
 </div>
