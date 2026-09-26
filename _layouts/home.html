@@ -3,68 +3,174 @@ layout: default
 ---
 <style>
 .post-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 40px 0;
-  border-bottom: 1px solid #e5e5e5;
-  transition: all 0.24s ease;
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+padding: 40px 0;
+border-bottom: 1px solid #e5e5e5;
+transition: all 0.24s ease;
 }
 .post-card:hover {
-  transform: translateY(-2px);
+transform: translateY(-2px);
 }
 .post-card-thumb {
-  width:140px;
-  height:100px;
-  object-fit: cover;
-  border-radius:4px;
-  flex-shrink:0;
+width:140px;
+height:100px;
+object-fit: cover;
+border-radius:4px;
+flex-shrink:0;
 }
 .post-card-text {
-  text-align: right;
-  flex: none;
-  padding-top:0px;
+text-align: right;
+flex: none;
+padding-top:0px;
 }
 .post-card-date {
-  color:#777;
-  font-size:12px;
-  margin-bottom: 8px;
-  line-height: 8px;
+color:#777;
+font-size:12px;
+margin-bottom: 8px;
+line-height:1.2;
 }
 .post-card-title {
-  font-size:16px;
-  font-weight:500;
+font-size:16px;
+font-weight:500;
 }
 .post-card-title a {
-  color:#222;
-  text-decoration:none;
+color:#222;
+text-decoration:none;
 }
 .post-card-title a:hover {
-  color:#000;
-  text-decoration: none;
+color:#000;
+text-decoration: none;
 }
 /* 移动端适配，小屏幕图片放上方，文字改成左对齐 */
 @media (max-width:640px) {
-  .post-card {
-    flex-direction: column;
-    align-items: flex-start;
+.post-card {
+flex-direction: column;
+align-items: flex-start;
   }
-  .post-card-thumb {
-    width:100%;
-    height:180px;
+.post-card-thumb {
+width:100%;
+height:180px;
   }
-  .post-card-text {
-    text-align:left;
-    padding-top: 8px;
+.post-card-text {
+text-align:left;
+padding-top: 8px;
   }
 }
 </style>
-
 <div class="container">
 <div class="home-intro">
 <h1>{{ site.title }}</h1>
 <p>{{ site.description }}</p>
 </div>
+<style>
+/* 首页轮播 带圆点指示器 + 自动同步激活圆点 */
+.home-carousel-wrap {
+width: 100%;
+position: relative;
+overflow: hidden;
+border-radius:12px;
+margin:40px 0 60px;
+}
+.home-carousel {
+display: flex;
+width: 300%;
+transition: transform 0.6s ease;
+}
+.carousel-item {
+width: 100%;
+}
+.carousel-item img {
+width:100%;
+height:380px;
+object-fit: cover;
+display:block;
+}
+/* 圆点容器 */
+.carousel-dots {
+position:absolute;
+bottom:16px;
+left:50%;
+transform: translateX(-50%);
+display:flex;
+gap:8px;
+}
+.carousel-dots span {
+width:10px;
+height:10px;
+border-radius:50%;
+background:rgba(255,255,255,0.45);
+cursor:pointer;
+transition: 0.3s;
+}
+.carousel-dots span.active {
+background:#fff;
+}
+/* 移动端适配 */
+@media(max-width:768px){
+.carousel-item img {
+height:220px;
+  }
+}
+</style>
+<div class="home-carousel-wrap">
+<div class="home-carousel">
+<div class="carousel-item">
+<img src="{{ site.baseurl }}/assets/images/banner1.jpg" alt="轮播图">
+</div>
+<div class="carousel-item">
+<img src="{{ site.baseurl }}/assets/images/banner2.jpg" alt="轮播图">
+</div>
+<div class="carousel-item">
+<img src="{{ site.baseurl }}/assets/images/banner3.jpg" alt="轮播图">
+</div>
+</div>
+<!-- 底部小圆点 -->
+<div class="carousel-dots">
+<span data-index="0" class="active"></span>
+<span data-index="1"></span>
+<span data-index="2"></span>
+</div>
+</div>
+<script>
+const wrap = document.querySelector('.home-carousel-wrap');
+const carousel = wrap.querySelector('.home-carousel');
+const dots = wrap.querySelectorAll('.carousel-dots span');
+const total = dots.length;
+let current = 0;
+let timer;
+// 切换函数
+function goTo(index) {
+current = index;
+carousel.style.transform = `translateX(-${current * 100}%)`;
+dots.forEach(d => d.classList.remove('active'));
+dots[current].classList.add('active');
+}
+// 自动轮播
+function autoPlay() {
+timer = setInterval(() => {
+current = (current + 1) % total;
+goTo(current);
+  }, 5000);
+}
+// 点击圆点切换
+dots.forEach((dot, idx) => {
+dot.addEventListener('click', () => {
+clearInterval(timer);
+goTo(idx);
+autoPlay(); // 点击后重置计时
+  });
+});
+// ✅ 鼠标悬停暂停，移开继续播放
+wrap.addEventListener('mouseenter', ()=>{
+clearInterval(timer);
+})
+wrap.addEventListener('mouseleave', ()=>{
+autoPlay();
+})
+autoPlay();
+</script>
 <div class="posts-timeline">
     {% assign postsByYear = site.posts | group_by_exp: "post", "post.date | date: '%Y'" %}
     {% for year in postsByYear %}
@@ -73,16 +179,16 @@ layout: default
     {% for post in year.items %}
 <div class="post-card">
   {% if post.thumbnail %}
-    <img class="post-card-thumb" src="{{ site.baseurl }}{{ post.thumbnail }}" alt="{{ post.title }}">
+<img class="post-card-thumb" src="{{ site.baseurl }}{{ post.thumbnail }}" alt="{{ post.title }}">
   {% else %}
-    <div class="post-card-thumb" style="background:#f5f5f5;"></div>
+<div class="post-card-thumb" style="background:#f5f5f5;"></div>
   {% endif %}
-  <div class="post-card-text">
-    <div class="post-card-date">{{ post.date | date:"%m-%d" }}</div>
-    <div class="post-card-title">
-      <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title | escape }}</a>
-    </div>
-  </div>
+<div class="post-card-text">
+<div class="post-card-date">{{ post.date | date:"%m-%d" }}</div>
+<div class="post-card-title">
+<a href="{{ site.baseurl }}{{ post.url }}">{{ post.title | escape }}</a>
+</div>
+</div>
 </div>
     {% endfor %}
 </div>
