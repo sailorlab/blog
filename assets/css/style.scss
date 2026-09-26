@@ -63,9 +63,11 @@ body {
 
 /* Layout Container */
 .container {
-  max-width: 960px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Header */
