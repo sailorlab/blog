@@ -68,7 +68,7 @@ layout: default
       <div class="meta-line">标签</div>
       <div>
         {% for tag in page.tags %}
-          <a class="tag-item" href="{{ site.baseurl }}/tags/#">{{ tag }}</a>
+          <a class="tag-item" href="{{ site.baseurl }}/tags/" onclick="showTag('{{ tag }}')">{{ tag }}</a>
         {% endfor %}
       </div>
     </aside>
