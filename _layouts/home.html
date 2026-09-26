@@ -141,7 +141,6 @@ height:220px;
 const wrap = document.querySelector('.home-carousel-wrap');
 const carousel = wrap.querySelector('.home-carousel');
 const dots = wrap.querySelectorAll('.carousel-dots span');
-const imgs = wrap.querySelectorAll('.carousel-item img');
 const realTotal = dots.length; //真实图片数量 3张
 let current = 0;
 let timer;
@@ -176,7 +175,7 @@ function goTo(index) {
 
 // 自动轮播，每张停留6秒
 function autoPlay() {
-timer = setInterval(() => {
+  timer = setInterval(() => {
     current = current + 1;
     goTo(current);
   }, 6000);
@@ -184,33 +183,24 @@ timer = setInterval(() => {
 
 // 点击圆点切换
 dots.forEach((dot, idx) => {
-dot.addEventListener('click', () => {
-clearInterval(timer);
-goTo(idx);
-autoPlay();
+  dot.addEventListener('click', () => {
+    clearInterval(timer);
+    goTo(idx);
+    autoPlay();
   });
 });
 
 // 鼠标悬停暂停，移开继续播放
 wrap.addEventListener('mouseenter', ()=>{
-clearInterval(timer);
+  clearInterval(timer);
 })
 wrap.addEventListener('mouseleave', ()=>{
-autoPlay();
+  autoPlay();
 })
 
-// 图片预加载，全部加载完才启动轮播
-let loadedCount = 0;
-imgs.forEach(img => {
-  if(img.complete){
-    loadedCount++;
-    if(loadedCount >= imgs.length) autoPlay();
-  }else{
-    img.onload = () => {
-      loadedCount++;
-      if(loadedCount >= imgs.length) autoPlay();
-    }
-  }
+// 页面全部加载完毕再启动轮播，计时稳定
+window.addEventListener('load', function(){
+  autoPlay();
 })
 </script>
 <div class="posts-timeline">
