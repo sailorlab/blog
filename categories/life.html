@@ -33,7 +33,7 @@ h1:first-of-type {
   padding-bottom: 1rem;
 }
 </style>
-{% assign posts = site.posts | where_exp:"item","item.categories contains 'life'" %}
+{% assign posts = site.posts | where_exp:"item","item.category == 'life'" %}
 
 <div class="container">
 <div class="home-intro">
