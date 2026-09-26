@@ -6,6 +6,21 @@
   {% seo %}
 <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/style.css">
 <link rel="alternate" type="application/rss+xml" title="{{ site.title }} - RSS Feed" href="{{ site.baseurl }}/feed.xml">
+/* 移动端导航修复，屏幕小于768px生效 */
+@media (max-width:768px) {
+  .main-nav {
+    gap:12px !important;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .main-nav a {
+    font-size:14px;
+    white-space: nowrap;
+  }
+  .site-header {
+    padding:12px 0;
+  }
+}
 </head>
 <body>
 <header class="header">
