@@ -37,8 +37,6 @@ exclude:
   - Gemfile.lock
   - vendor/
 
-# ── PaperMod 主题基础配置 ──
-theme: minima # 如果是源码部署，删掉这一行；Gem主题保留
 # 开启文章目录、搜索、归档等功能
 params:
   env: production # production / development

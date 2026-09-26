@@ -25,7 +25,7 @@ h1:first-of-type {
   font-size: 16.8px;
 }
 /* hover鼠标悬浮时标题变色 */
-.post-item h2 a, a:link, a:visited, a:hover, a:active {
+.post-item h2 a:hover {
   color: #0066cc;
   text-decoration: none; 
 }
@@ -33,7 +33,7 @@ h1:first-of-type {
   padding-bottom: 1rem;
 }
 </style>
-{% assign posts = site.posts | where_exp:"item","item.category == 'life'" %}
+{% assign posts = site.posts | where_exp:"item","item.categories contains 'life'" %}
 
 <div class="container">
 <div class="home-intro">
