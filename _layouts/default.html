@@ -1,29 +1,20 @@
-{%- assign url_segments = page.url | split: '/' -%}
-{%- assign relative_depth = url_segments.size | minus: 1 -%}
-{%- assign relative_prefix = "" -%}
-{%- if relative_depth > 0 -%}
-  {%- for i in (1..relative_depth) -%}
-    {%- assign relative_prefix = relative_prefix | append: "../" -%}
-  {%- endfor -%}
-{%- endif -%}<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
   {% seo %}
-  <link rel="stylesheet" href="{{ relative_prefix }}assets/css/style.css">
-  <link rel="alternate" type="application/rss+xml" title="{{ site.title }} - RSS Feed" href="{{ relative_prefix }}feed.xml">
+<link rel="stylesheet" href="{{ site.baseurl }}/assets/css/style.css">
+<link rel="alternate" type="application/rss+xml" title="{{ site.title }} - RSS Feed" href="{{ site.baseurl }}/feed.xml">
 </head>
 <body>
 <header class="header">
-  <div class="container header-container" style="display:flex;align-items:center;">
-    <a href="{{ site.baseurl }}/" class="site-title" style="width:40px;height:40px;display:block;overflow:hidden;">
-    <img src="{{ site.baseurl }}/assets/images/308211478.jpg" alt="头像" style="height:40px;width:40px;border-radius:50%;object-fit:cover;">
-    </a>
+<div class="container header-container" style="display:flex;align-items:center;">
+<a href="{{ site.baseurl }}/" class="site-title" style="width:40px;height:40px;display:block;overflow:hidden;">
+<img src="{{ site.baseurl }}/assets/images/308211478.jpg" alt="头像" style="height:40px;width:40px;border-radius:50%;object-fit:cover;">
+</a>
 <nav class="nav" style="margin-left:auto;display:flex;gap:24px;align-items:center;">
-
 {% assign now = "now" | date: "%s" %}
-
 {% assign life_posts = site.posts | where_exp:"item","item.category == 'life'" %}
 {% assign life_new = false %}
 {% for p in life_posts %}
@@ -33,11 +24,10 @@
 {% endfor %}
 <a href="{{ site.baseurl }}/categories/life/" style="position:relative;padding-left:12px;">
   {% if life_new %}
-  <span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
+<span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
   {% endif %}
   关于生活
 </a>
-
 {% assign work_posts = site.posts | where_exp:"item","item.category == 'work'" %}
 {% assign work_new = false %}
 {% for p in work_posts %}
@@ -47,11 +37,10 @@
 {% endfor %}
 <a href="{{ site.baseurl }}/categories/work/" style="position:relative;padding-left:12px;">
   {% if work_new %}
-  <span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
+<span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
   {% endif %}
   工作及其他
 </a>
-
 {% assign hobby_posts = site.posts | where_exp:"item","item.category == 'hobby'" %}
 {% assign hobby_new = false %}
 {% for p in hobby_posts %}
@@ -61,31 +50,28 @@
 {% endfor %}
 <a href="{{ site.baseurl }}/categories/hobby/" style="position:relative;padding-left:12px;">
   {% if hobby_new %}
-  <span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
+<span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
   {% endif %}
   一点兴趣
 </a>
-
 <a href="https://github.com/sailorlab" target="_blank" rel="noopener noreferrer">Github</a>
 </nav>
-  </div>
+</div>
 </header>
-
-  <main class="main">
+<main class="main">
     {{ content }}
-  </main>
-
-  <footer class="footer">
-    <div class="container footer-container">
-      <p class="footer-desc">{{ site.description }}</p>
-      <p class="footer-meta">
-        <span>© {{ 'now' | date: '%Y' }} {{ site.author }}</span>
-        <span class="divider">·</span>
-        <a href="{{ relative_prefix }}feed.xml">RSS 订阅</a>
-        <span class="divider">·</span>
-        <a href="https://github.com/ninehills/blog" target="_blank" rel="noopener noreferrer">源码</a>
-      </p>
-    </div>
-  </footer>
+</main>
+<footer class="footer">
+<div class="container footer-container">
+<p class="footer-desc">{{ site.description }}</p>
+<p class="footer-meta">
+<span>© {{ 'now' | date: '%Y' }} {{ site.author }}</span>
+<span class="divider">·</span>
+<a href="{{ site.baseurl }}/feed.xml">RSS 订阅</a>
+<span class="divider">·</span>
+<a href="https://github.com/ninehills/blog" target="_blank" rel="noopener noreferrer">源码</a>
+</p>
+</div>
+</footer>
 </body>
 </html>
