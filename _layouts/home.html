@@ -4,10 +4,10 @@ layout: default
 <style>
 .post-card {
   display: flex;
-  gap: 20px;
+  justify-content: space-between;
   align-items: flex-start;
-  padding:16px 0;
-  border-bottom: 1px solid #eee;
+  padding: 20px 0;
+  border-bottom: 1px solid #e5e5e5;
   transition: all 0.24s ease;
 }
 .post-card:hover {
@@ -21,16 +21,17 @@ layout: default
   flex-shrink:0;
 }
 .post-card-text {
-  /* 文字区域和图片右边缘对齐，不再占满剩余全部宽度 */
+  text-align: right;
   flex: none;
+  padding-top:4px;
 }
 .post-card-date {
   color:#777;
-  font-size:14px;
-  margin-bottom:6px;
+  font-size:24px;
+  margin-bottom:8px;
 }
 .post-card-title {
-  font-size:20px;
+  font-size:36px;
   font-weight:500;
 }
 .post-card-title a {
@@ -41,7 +42,7 @@ layout: default
   color:#000;
   text-decoration: underline;
 }
-/* 移动端适配，小屏幕图片放上方 */
+/* 移动端适配，小屏幕图片放上方，文字改成左对齐 */
 @media (max-width:640px) {
   .post-card {
     flex-direction: column;
@@ -52,7 +53,8 @@ layout: default
     height:180px;
   }
   .post-card-text {
-    flex: unset;
+    text-align:left;
+    padding-top: 8px;
   }
 }
 </style>
