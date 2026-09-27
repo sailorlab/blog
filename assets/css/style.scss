@@ -714,7 +714,14 @@ body {
 .post-card-title:hover {
   color:#4472c4;
 }
-
+.post-card-tags {
+  margin-top:8px;
+  font-size:12px;
+  color:#888;
+}
+.post-card-tags span {
+  margin-left:6px;
+}
 /* 移动端适配：宽度小于640px，卡片垂直排列 */
 @media (max-width: 640px) {
   .post-card {
