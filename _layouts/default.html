@@ -21,19 +21,21 @@
   width:100%;
   border-top:1px solid #eee;
   margin-top:12px;
+  padding: 8px 0;
 }
 .mobile-menu a {
   display:block;
-  padding:12px 0;
+  padding:16px 12px;
   text-decoration:none;
   position:relative;
-  padding-left:12px;
-  color:#222; /* 和PC导航文字同色 */
-  border-bottom:1px solid #eeeeee; /* 灰色分割横线 */
+  color:#222;
+  border-bottom:1px solid #eeeeee;
 }
-/* 最后一条链接去掉底部边框，避免多余线条 */
 .mobile-menu a:last-child {
   border-bottom:none;
+}
+.mobile-menu a:hover {
+  color:#4472c4;
 }
 .mobile-menu.open {
   display:block;
