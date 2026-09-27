@@ -1,28 +1,19 @@
 ---
 layout: default
-title: 归档
+title: 文章归档
 permalink: /archives/
 ---
 <div class="container">
 <div class="home-intro">
-<h1>{{ page.title }}</h1>
-<p>全部文章按时间倒序汇总</p>
+<p>全部文章归档列表</p>
 </div>
-<div class="posts-timeline">
-{% assign postsByYear = site.posts | group_by_exp: "post", "post.date | date: '%Y'" %}
-{% for year in postsByYear %}
-<div class="timeline-year-group">
-<h2 class="timeline-year">{{ year.name }}</h2>
-<ul class="timeline-posts">
-    {% for post in year.items %}
-<li class="timeline-post-item">
-<time class="timeline-post-date" datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%m-%d" }}</time>
-<a class="timeline-post-link" href="{{ site.baseurl }}{{ post.url }}">{{ post.title | escape }}</a>
-<hr style="border:none; border-bottom:1px solid #303030; margin:10px 0 14px 0;">
-</li>
-    {% endfor %}
-</ul>
+{% for post in site.posts %}
+<div class="post-card">
+<img class="post-card-thumb" src="{{ site.baseurl }}{{ post.thumbnail }}" alt="{{ post.title }}">
+<div class="post-card-text">
+<div class="post-card-date">{{ post.date | date: "%Y-%m-%d" }}</div>
+<a class="post-card-title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
+</div>
 </div>
 {% endfor %}
-</div>
 </div>

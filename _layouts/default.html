@@ -28,6 +28,12 @@
   text-decoration:none;
   position:relative;
   padding-left:12px;
+  color:#222; /* 和PC导航文字同色 */
+  border-bottom:1px solid #eeeeee; /* 灰色分割横线 */
+}
+/* 最后一条链接去掉底部边框，避免多余线条 */
+.mobile-menu a:last-child {
+  border-bottom:none;
 }
 .mobile-menu.open {
   display:block;
