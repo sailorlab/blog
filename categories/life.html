@@ -4,6 +4,11 @@ title: 关于生活
 permalink: /categories/life/
 ---
 <style>
+.post-list-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px 32px; /* 上下间距40px，左右两卡片之间32px */
+}
 .post-card {
 display: flex;
 justify-content: space-between;
@@ -53,7 +58,13 @@ color:#888;
 .post-card-tags span {
 margin-left:6px;
 }
-/* 移动端适配 */
+/* 平板及手机：变回单列 */
+@media (max-width:768px) {
+.post-list-grid {
+  grid-template-columns: 1fr;
+}
+}
+/* 移动端卡片内部上下排版 */
 @media (max-width:640px) {
 .post-card {
 flex-direction: column;
@@ -73,6 +84,8 @@ padding-top: 8px;
 <div class="home-intro">
 <p>生活随笔与日常记录</p>
 </div>
+<!-- 外层加上网格容器 class="post-list-grid" -->
+<div class="post-list-grid">
   {% assign posts = site.posts | where_exp:"item","item.category == 'life'" %}
   {% for post in posts %}
 <div class="post-card">
@@ -95,4 +108,5 @@ padding-top: 8px;
 </div>
 </div>
   {% endfor %}
+</div>
 </div>
