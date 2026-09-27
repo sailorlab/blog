@@ -7,29 +7,50 @@
 <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/style.css">
 <link rel="alternate" type="application/rss+xml" title="{{ site.title }} - RSS Feed" href="{{ site.baseurl }}/feed.xml">
 <style>
-/* 移动端导航修复 */
+/* ========== 汉堡菜单新增样式 ========== */
+.hamburger-btn {
+  display: none;
+  border: 0;
+  background: transparent;
+  font-size:26px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.mobile-menu {
+  display: none;
+  width:100%;
+  border-top:1px solid #eee;
+  margin-top:12px;
+}
+.mobile-menu a {
+  display:block;
+  padding:12px 0;
+  text-decoration:none;
+  position:relative;
+  padding-left:12px;
+}
+.mobile-menu.open {
+  display:block;
+}
+/* 移动端：隐藏横向导航，显示汉堡按钮 */
 @media (max-width:768px) {
   .nav {
-    flex-wrap: wrap;
-    gap:12px !important;
-    justify-content: flex-end;
+    display: none !important;
   }
-  .nav a {
-    font-size:14px;
-    white-space: nowrap;
-  }
-  .header .container {
-    padding:12px 0;
+  .hamburger-btn {
+    display:block;
   }
 }
 </style>
 </head>
 <body>
 <header class="header">
-<div class="container" style="display:flex;align-items:center;">
+<div class="container" style="display:flex;align-items:center;flex-wrap:wrap;">
 <a href="{{ site.baseurl }}/" class="site-title" style="width:40px;height:40px;display:block;overflow:hidden;">
 <img src="{{ site.baseurl }}/assets/images/308211478.jpg" alt="头像" style="height:40px;width:40px;border-radius:50%;object-fit:cover;">
 </a>
+
+<!-- PC横向导航【保留你原版全部代码】 -->
 <nav class="nav" style="margin-left:auto;display:flex;gap:24px;align-items:center;">
 {% assign now = "now" | date: "%s" %}
 {% assign life_posts = site.posts | where_exp:"item","item.category == 'life'" %}
@@ -71,7 +92,6 @@
   {% endif %}
   一点兴趣
 </a>
-<!-- ========== 新增【标签集合】，同样带绿点（7天内有新文章就点亮绿点） ========== -->
 {% assign tag_posts = site.posts %}
 {% assign tag_new = false %}
 {% for p in tag_posts %}
@@ -87,6 +107,38 @@
 </a>
 <a href="https://github.com/sailorlab" target="_blank" rel="noopener noreferrer">Github</a>
 </nav>
+
+<!-- 汉堡按钮（手机端才显示） -->
+<button class="hamburger-btn" aria-label="打开菜单" style="margin-left:auto;">☰</button>
+
+<!-- 移动端下拉菜单，复用上面变量，绿点同步生效 -->
+<div class="mobile-menu">
+  <a href="{{ site.baseurl }}/categories/life/" style="position:relative;padding-left:12px;">
+    {% if life_new %}
+    <span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
+    {% endif %}
+    关于生活
+  </a>
+  <a href="{{ site.baseurl }}/categories/work/" style="position:relative;padding-left:12px;">
+    {% if work_new %}
+    <span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
+    {% endif %}
+    工作及其他
+  </a>
+  <a href="{{ site.baseurl }}/categories/hobby/" style="position:relative;padding-left:12px;">
+    {% if hobby_new %}
+    <span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
+    {% endif %}
+    一点兴趣
+  </a>
+  <a href="{{ site.baseurl }}/tags/" style="position:relative;padding-left:12px;">
+    {% if tag_new %}
+    <span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
+    {% endif %}
+    标签集合
+  </a>
+  <a href="https://github.com/sailorlab" target="_blank" rel="noopener noreferrer">Github</a>
+</div>
 </div>
 </header>
 <main class="main">
@@ -104,5 +156,20 @@
 </p>
 </div>
 </footer>
+
+<!-- 汉堡菜单点击切换JS -->
+<script>
+const hamburgerBtn = document.querySelector('.hamburger-btn');
+const mobileMenu = document.querySelector('.mobile-menu');
+hamburgerBtn.addEventListener('click',()=>{
+  mobileMenu.classList.toggle('open');
+})
+// 点击页面空白处自动关闭菜单
+document.addEventListener('click',(e)=>{
+  if(!hamburgerBtn.contains(e.target) && !mobileMenu.contains(e.target)){
+    mobileMenu.classList.remove('open');
+  }
+})
+</script>
 </body>
 </html>
