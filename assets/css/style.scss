@@ -673,3 +673,59 @@ body {
   /* Literal.String */ .s, .sa, .sb, .sc, .dl, .sd, .s2, .se, .sh, .si, .sx, .sr, .s1, .ss { color: #9ecbff; }
   /* Literal.Number */ .m, .mb, .mdf, .me, .mf, .mh, .mi, .il, .ip, .ix, .mo { color: #79b8ff; }
 }
+/* ========== 全站文章卡片统一样式 左缩略图｜右侧右对齐文字 ========== */
+.post-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 40px 0;
+  border-bottom: 1px solid #e5e5e5;
+  transition: all 0.24s ease;
+}
+.post-card:hover {
+  transform: translateY(-2px);
+}
+.post-card-thumb {
+  width:140px;
+  height:100px;
+  object-fit: cover;
+  object-position: center center;
+  border-radius:4px;
+  flex-shrink:0;
+  overflow:hidden;
+}
+.post-card-text {
+  text-align: right;
+  flex: none;
+  padding-top:0px;
+}
+.post-card-date {
+  color:#777;
+  font-size:12px;
+  margin-bottom: 8px;
+  line-height:1.2;
+}
+.post-card-title {
+  font-size:18px;
+  font-weight:500;
+  text-decoration:none;
+  color:#222;
+}
+.post-card-title:hover {
+  color:#4472c4;
+}
+
+/* 移动端适配：宽度小于640px，卡片垂直排列 */
+@media (max-width: 640px) {
+  .post-card {
+    flex-direction: column;
+  }
+  .post-card-text {
+    text-align: left;
+    margin-top:12px;
+  }
+  .post-card-thumb {
+    width:100%;
+    height:160px;
+  }
+}

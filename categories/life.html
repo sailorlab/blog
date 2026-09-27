@@ -10,12 +10,12 @@ permalink: /categories/life/
 
   {% assign posts = site.posts | where_exp:"item","item.category == 'life'" %}
   {% for post in posts %}
-  <div class="post-card">
-    <img class="post-card-thumb" src="{{ post.thumbnail }}" alt="{{ post.title }}">
-    <div class="post-card-text">
-      <div class="post-card-date">{{ post.date | date: "%Y-%m-%d" }}</div>
-      <a class="post-card-title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
-    </div>
+<div class="post-card">
+  <img class="post-card-thumb" src="{{ post.thumbnail }}" alt="{{ post.title }}">
+  <div class="post-card-text">
+    <div class="post-card-date">{{ post.date | date: "%Y-%m-%d" }}</div>
+    <a class="post-card-title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
   </div>
+</div>
   {% endfor %}
 </div>
