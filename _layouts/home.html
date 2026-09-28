@@ -55,18 +55,21 @@ color:#888;
 .post-card-tags span {
 margin-left:6px;
 }
-/* ========= 新增外层grid两列布局 ========= */
+/* ========= 核心修改：Grid放在年份分组容器 ========= */
 .posts-timeline {
-display: grid;
-grid-template-columns: repeat(2, 1fr);
-gap: 30px;
+  /* 移除外层grid */
+}
+.timeline-year-group {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
 }
 .timeline-year {
-grid-column: 1 / -1;
+  grid-column: 1 / -1;
 }
 /* 移动端适配，小屏幕变回单列，卡片内部图片放上方，文字改成左对齐 */
 @media (max-width:640px) {
-.posts-timeline {
+.timeline-year-group {
 grid-template-columns: 1fr;
 }
 .post-card {
