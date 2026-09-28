@@ -10,7 +10,7 @@ display: flex;
 justify-content: space-between;
 align-items: flex-start;
 padding: 40px 0;
-border-bottom: 1px solid #e5e5e5;
+width:100%; /* 关键：卡片填满网格格子 */
 transition: all 0.24s ease;
 }
 .post-card:hover {
@@ -25,8 +25,9 @@ flex-shrink:0;
 }
 .post-card-text {
 text-align: right;
-flex: none;
+flex: 1; /* 文字区域自动填充剩余宽度 */
 padding-top:0px;
+padding-left:20px;
 }
 .post-card-date {
 color:#777;
@@ -55,17 +56,20 @@ color:#888;
 .post-card-tags span {
 margin-left:6px;
 }
-/* ========= 核心修改：Grid放在年份分组容器 ========= */
+/* ========= Grid放在年份分组容器 ========= */
 .posts-timeline {
-  /* 移除外层grid */
 }
 .timeline-year-group {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 30px;
+  width:100%; /* 年份组撑满父容器container，和轮播同宽 */
 }
 .timeline-year {
   grid-column: 1 / -1;
+}
+.timeline-year-group .post-card {
+border-bottom: 1px solid #e5e5e5;
 }
 /* 移动端适配，小屏幕变回单列，卡片内部图片放上方，文字改成左对齐 */
 @media (max-width:640px) {
@@ -82,7 +86,8 @@ height:180px;
   }
 .post-card-text {
 text-align:left;
-padding-top: 8px;
+padding-top: 12px;
+padding-left:0;
   }
 .post-card-tags {
 margin-left:0;
