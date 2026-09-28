@@ -1,265 +1,183 @@
----
-layout: default
----
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% seo %}
+<link rel="stylesheet" href="{{ site.baseurl }}/assets/css/style.css">
+<link rel="alternate" type="application/rss+xml" title="{{ site.title }} - RSS Feed" href="{{ site.baseurl }}/feed.xml">
 <style>
-.post-card {
-display: flex;
-justify-content: space-between;
-align-items: flex-start;
-padding: 40px 0;
-border-bottom: 1px solid #e5e5e5;
-transition: all 0.24s ease;
+/* ========== 汉堡菜单新增样式 ========== */
+.hamburger-btn {
+  display: none;
+  border: 0;
+  background: transparent;
+  font-size:26px;
+  cursor: pointer;
+  padding: 4px 8px;
 }
-.post-card:hover {
-transform: translateY(-2px);
+.mobile-menu {
+  display: none;
+  width:100%;
+  border-top:1px solid #eee;
+  margin-top:12px;
+  padding: 8px 0;
 }
-.post-card-thumb {
-width:140px;
-height:100px;
-object-fit: cover;
-border-radius:4px;
-flex-shrink:0;
+.mobile-menu a {
+  display:block;
+  padding:16px 12px;
+  text-decoration:none;
+  position:relative;
+  color:#222;
+  border-bottom:1px solid #eeeeee;
 }
-.post-card-text {
-text-align: right;
-flex: none;
-padding-top:0px;
+.mobile-menu a:last-child {
+  border-bottom:none;
 }
-.post-card-date {
-color:#777;
-font-size:12px;
-margin-bottom: 8px;
-line-height:1.2;
+.mobile-menu a:hover {
+  color:#4472c4;
 }
-.post-card-title {
-font-size:16px;
-font-weight:500;
+.mobile-menu.open {
+  display:block;
 }
-.post-card-title a {
-color:#222;
-text-decoration:none;
-}
-.post-card-title a:hover {
-color:#000;
-text-decoration: none;
-}
-/* 【新增】卡片标签样式 */
-.post-card-tags {
-margin-top:8px;
-font-size:12px;
-color:#888;
-}
-.post-card-tags span {
-margin-left:6px;
-}
-/* ========= 新增外层grid两列布局 ========= */
-.posts-timeline {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 30px;
-}
-.timeline-year {
-  grid-column: 1 / -1;
-}
-/* 移动端适配，小屏幕变回单列，卡片内部图片放上方，文字改成左对齐 */
-@media (max-width:640px) {
-.posts-timeline {
-  grid-template-columns: 1fr;
-}
-.post-card {
-flex-direction: column;
-align-items: flex-start;
+/* 移动端：隐藏横向导航，显示汉堡按钮 */
+@media (max-width:768px) {
+  .nav {
+    display: none !important;
   }
-.post-card-thumb {
-width:100%;
-height:180px;
-  }
-.post-card-text {
-text-align:left;
-padding-top: 8px;
-  }
-.post-card-tags {
-margin-left:0;
+  .hamburger-btn {
+    display:block;
   }
 }
 </style>
-<div class="container">
-<div class="home-intro">
-<h1>{{ site.title }}</h1>
-<p>{{ site.description }}</p>
+</head>
+<body>
+<header class="header">
+<div class="container" style="display:flex;align-items:center;flex-wrap:wrap;">
+<a href="{{ site.baseurl }}/" class="site-title" style="width:40px;height:40px;display:block;overflow:hidden;">
+<img src="{{ site.baseurl }}/assets/images/308211478.jpg" alt="头像" style="height:40px;width:40px;border-radius:50%;object-fit:cover;">
+</a>
+
+<!-- PC横向导航【保留你原版全部代码】 -->
+<nav class="nav" style="margin-left:auto;display:flex;gap:24px;align-items:center;">
+{% assign now = "now" | date: "%s" %}
+{% assign life_posts = site.posts | where_exp:"item","item.category == 'life'" %}
+{% assign life_new = false %}
+{% for p in life_posts %}
+  {% assign p_time = p.date | date:"%s" %}
+  {% assign diff = now | minus:p_time %}
+  {% if diff < 604800 %}{% assign life_new = true %}{% endif %}
+{% endfor %}
+<a href="{{ site.baseurl }}/categories/life/" style="position:relative;padding-left:12px;">
+  {% if life_new %}
+<span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
+  {% endif %}
+  关于生活
+</a>
+{% assign work_posts = site.posts | where_exp:"item","item.category == 'work'" %}
+{% assign work_new = false %}
+{% for p in work_posts %}
+  {% assign p_time = p.date | date:"%s" %}
+  {% assign diff = now | minus:p_time %}
+  {% if diff < 604800 %}{% assign work_new = true %}{% endif %}
+{% endfor %}
+<a href="{{ site.baseurl }}/categories/work/" style="position:relative;padding-left:12px;">
+  {% if work_new %}
+<span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
+  {% endif %}
+  工作及其他
+</a>
+{% assign hobby_posts = site.posts | where_exp:"item","item.category == 'hobby'" %}
+{% assign hobby_new = false %}
+{% for p in hobby_posts %}
+  {% assign p_time = p.date | date:"%s" %}
+  {% assign diff = now | minus:p_time %}
+  {% if diff < 604800 %}{% assign hobby_new = true %}{% endif %}
+{% endfor %}
+<a href="{{ site.baseurl }}/categories/hobby/" style="position:relative;padding-left:12px;">
+  {% if hobby_new %}
+<span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
+  {% endif %}
+  一点兴趣
+</a>
+{% assign tag_posts = site.posts %}
+{% assign tag_new = false %}
+{% for p in tag_posts %}
+  {% assign p_time = p.date | date:"%s" %}
+  {% assign diff = now | minus:p_time %}
+  {% if diff < 604800 %}{% assign tag_new = true %}{% endif %}
+{% endfor %}
+<a href="{{ site.baseurl }}/tags/" style="position:relative;padding-left:12px;">
+  {% if tag_new %}
+<span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
+  {% endif %}
+  标签集合
+</a>
+<a href="https://github.com/sailorlab" target="_blank" rel="noopener noreferrer">Github</a>
+</nav>
+
+<!-- 汉堡按钮（手机端才显示） -->
+<button class="hamburger-btn" aria-label="打开菜单" style="margin-left:auto;">☰</button>
+
+<!-- 移动端下拉菜单，复用上面变量，绿点同步生效 -->
+<div class="mobile-menu">
+  <a href="{{ site.baseurl }}/categories/life/" style="position:relative;padding-left:12px;">
+    {% if life_new %}
+    <span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
+    {% endif %}
+    关于生活
+  </a>
+  <a href="{{ site.baseurl }}/categories/work/" style="position:relative;padding-left:12px;">
+    {% if work_new %}
+    <span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
+    {% endif %}
+    工作及其他
+  </a>
+  <a href="{{ site.baseurl }}/categories/hobby/" style="position:relative;padding-left:12px;">
+    {% if hobby_new %}
+    <span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
+    {% endif %}
+    一点兴趣
+  </a>
+  <a href="{{ site.baseurl }}/tags/" style="position:relative;padding-left:12px;">
+    {% if tag_new %}
+    <span style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:999px;background-color:#22c55e;"></span>
+    {% endif %}
+    标签集合
+  </a>
+  <a href="https://github.com/sailorlab" target="_blank" rel="noopener noreferrer">Github</a>
 </div>
-<style>
-/* 首页无缝轮播 */
-.home-carousel-wrap {
-width: 100%;
-position: relative;
-overflow: hidden;
-border-radius:12px;
-margin:40px 0 60px;
-}
-.home-carousel {
-display: flex;
-transition: transform 0.6s ease;
-}
-.carousel-item {
-width: 100%;
-flex-shrink: 0;
-}
-.carousel-item img {
-width:100%;
-height:380px;
-object-fit: cover;
-display:block;
-}
-/* 圆点容器 */
-.carousel-dots {
-position:absolute;
-bottom:16px;
-left:50%;
-transform: translateX(-50%);
-display:flex;
-gap:8px;
-}
-.carousel-dots span {
-width:10px;
-height:10px;
-border-radius:50%;
-background:rgba(255,255,255,0.45);
-cursor:pointer;
-transition: 0.3s;
-}
-.carousel-dots span.active {
-background:#fff;
-}
-/* 移动端适配 */
-@media(max-width:768px){
-.carousel-item img {
-height:220px;
-  }
-}
-</style>
-<div class="home-carousel-wrap">
-<div class="home-carousel">
-<div class="carousel-item">
-<img src="{{ site.baseurl }}/assets/images/banner1.jpg" alt="轮播图">
 </div>
-<div class="carousel-item">
-<img src="{{ site.baseurl }}/assets/images/banner2.jpg" alt="轮播图">
+</header>
+<main class="main">
+    {{ content }}
+</main>
+<footer class="footer">
+<div class="container footer-container">
+<p class="footer-desc">{{ site.description }}</p>
+<p class="footer-meta">
+<span>© {{ 'now' | date: '%Y' }} {{ site.author }}</span>
+<span class="divider">·</span>
+<a href="{{ site.baseurl }}/feed.xml">RSS 订阅</a>
+<span class="divider">·</span>
+<a href="https://github.com/sailorlab/blog" target="_blank" rel="noopener noreferrer">源码</a>
+</p>
 </div>
-<div class="carousel-item">
-<img src="{{ site.baseurl }}/assets/images/banner2.jpg" alt="轮播图">
-</div>
-<!-- 无缝关键：复制第一张放在末尾 -->
-<div class="carousel-item">
-<img src="{{ site.baseurl }}/assets/images/banner1.jpg" alt="轮播图">
-</div>
-</div>
-<!-- 底部小圆点（只3个，不含复制的那张） -->
-<div class="carousel-dots">
-<span data-index="0" class="active"></span>
-<span data-index="1"></span>
-<span data-index="2"></span>
-</div>
-</div>
+</footer>
+
+<!-- 汉堡菜单点击切换JS -->
 <script>
-const wrap = document.querySelector('.home-carousel-wrap');
-const carousel = wrap.querySelector('.home-carousel');
-const dots = wrap.querySelectorAll('.carousel-dots span');
-const imgs = wrap.querySelectorAll('.carousel-item img');
-const realTotal = dots.length; //真实图片数量 3张
-let current = 0;
-let timer;
-let isAnimating = false;
-// 切换函数
-function goTo(index) {
-if(isAnimating) return;
-isAnimating = true;
-current = index;
-carousel.style.transform = `translateX(-${current * 100}%)`;
-//圆点只对应真实3张
-dots.forEach(d => d.classList.remove('active'));
-if(current < realTotal){
-dots[current].classList.add('active');
-  }
-setTimeout(()=>{
-isAnimating = false;
-// 滑到复制的第4张，瞬间无动画切回0，实现无缝
-if(current === realTotal){
-carousel.style.transition = 'none';
-current = 0;
-carousel.style.transform = `translateX(0%)`;
-// 恢复动画
-carousel.offsetHeight; //触发重绘
-carousel.style.transition = 'transform 0.6s ease';
-dots[0].classList.add('active');
-    }
-  },600);
-}
-// 自动轮播，每张停留6秒
-function autoPlay() {
-timer = setInterval(() => {
-current = current + 1;
-goTo(current);
-  }, 6000);
-}
-// 点击圆点切换
-dots.forEach((dot, idx) => {
-dot.addEventListener('click', () => {
-clearInterval(timer);
-goTo(idx);
-autoPlay();
-  });
-});
-// 鼠标悬停暂停，移开继续播放
-wrap.addEventListener('mouseenter', ()=>{
-clearInterval(timer);
+const hamburgerBtn = document.querySelector('.hamburger-btn');
+const mobileMenu = document.querySelector('.mobile-menu');
+hamburgerBtn.addEventListener('click',()=>{
+  mobileMenu.classList.toggle('open');
 })
-wrap.addEventListener('mouseleave', ()=>{
-autoPlay();
-})
-// 图片预加载，全部加载完才启动轮播
-let loadedCount = 0;
-imgs.forEach(img => {
-if(img.complete){
-loadedCount++;
-if(loadedCount >= imgs.length) autoPlay();
-  }else{
-img.onload = () => {
-loadedCount++;
-if(loadedCount >= imgs.length) autoPlay();
-    }
+// 点击页面空白处自动关闭菜单
+document.addEventListener('click',(e)=>{
+  if(!hamburgerBtn.contains(e.target) && !mobileMenu.contains(e.target)){
+    mobileMenu.classList.remove('open');
   }
 })
 </script>
-<div class="posts-timeline">
-    {% assign postsByYear = site.posts | group_by_exp: "post", "post.date | date: '%Y'" %}
-    {% for year in postsByYear %}
-<div class="timeline-year-group">
-<h2 class="timeline-year">{{ year.name }}</h2>
-    {% for post in year.items %}
-<div class="post-card">
-  {% if post.thumbnail %}
-<img class="post-card-thumb" src="{{ site.baseurl }}{{ post.thumbnail }}" alt="{{ post.title }}">
-  {% else %}
-<div class="post-card-thumb" style="background:#f5f5f5;"></div>
-  {% endif %}
-<div class="post-card-text">
-<div class="post-card-date">{{ post.date | date:"%m-%d" }}</div>
-<div class="post-card-title">
-<a href="{{ site.baseurl }}{{ post.url }}">{{ post.title | escape }}</a>
-</div>
-<!-- ========== 新增标签区域 ========== -->
-{% if post.tags.size > 0 %}
-<div class="post-card-tags">
-  {% for tag in post.tags %}
-<span>#{{ tag }}</span>
-  {% endfor %}
-</div>
-{% endif %}
-</div>
-</div>
-    {% endfor %}
-</div>
-    {% endfor %}
-</div>
-</div>
+</body>
+</html>
