@@ -149,7 +149,8 @@ body {
 }
 
 .posts-timeline {
-  max-width: 680px;
+  max-width: unset;
+  width:100%;
 
   .timeline-year-group {
     margin-bottom: 3rem;
