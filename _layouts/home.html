@@ -188,22 +188,23 @@ font-size:20px;
 white-space:nowrap;
 text-shadow: none;
 }
-/* ========== 翻牌滚动数字样式 ========== */
+/* ========== 双位独立翻牌滚动数字样式 ========== */
 .flip-digit-wrap{
-    position:relative;
-    overflow:hidden;
-    height:1em;
-    display:inline-block;
-    vertical-align:baseline;
+position:relative;
+overflow:hidden;
+height:1em;
+display:inline-block;
+vertical-align:baseline;
 }
 .flip-digit{
-    position:absolute;
-    width:100%;
-    text-align:center;
-    transition: transform 0.5s cubic-bezier(0.2,0,0.3,1);
+position:absolute;
+width:100%;
+text-align:center;
+left:0;
+transition: transform 0.45s cubic-bezier(0.2, 0, 0.3, 1);
 }
 .flip-digit-up{
-    transform: translateY(-100%);
+transform: translateY(-100%);
 }
 @media(max-width:768px){
 .parallax-wrap{
@@ -226,8 +227,8 @@ height:calc(100% + 150px);
 <source src="{{ site.baseurl }}/assets/jeep-field-blue.mp4" type="video/mp4">
 </video>
 <div class="carousel-time-text">
-    <div class="time-main" id="carouselTime"></div>
-    <div class="type-sub" id="typeText"></div>
+<div class="time-main" id="carouselTime"></div>
+<div class="type-sub" id="typeText"></div>
 </div>
 <div class="carousel-dots">
 <span data-index="0" class="active"></span>
@@ -269,33 +270,39 @@ height:calc(100% + 150px);
 </div>
 <script>
 const timeDom = document.getElementById('carouselTime');
-let prevMinute = "";
+let prevMinTens = "";
+let prevMinUnit = "";
 let isFlipping = false;
 
-// 渲染时间：星期  HH:MM，仅分钟位滚动
-function renderTime(weekStr, hourStr, minStr, animate = false){
-    if(!animate){
-        timeDom.innerHTML = `${weekStr} ${hourStr}:<span class="flip-digit-wrap"><span class="flip-digit">${minStr}</span></span>`;
-        prevMinute = minStr;
-        return;
-    }
-    // 翻牌动画：旧数字向上滚消失，新数字从底部上来
-    timeDom.innerHTML = `
-        ${weekStr} ${hourStr}:<span class="flip-digit-wrap">
-            <span class="flip-digit">${prevMinute}</span>
-            <span class="flip-digit flip-digit-up">${minStr}</span>
-        </span>
-    `;
-    setTimeout(()=>{
-        const digitEl = timeDom.querySelector('.flip-digit-up');
-        digitEl.style.transform = 'translateY(0)';
-    },20);
+// 渲染函数，分离分钟十位、个位，独立翻牌
+function renderTime(weekStr, hourStr, minTens, minUnit, animate = false){
+  if(!animate){
+    timeDom.innerHTML = `${weekStr} ${hourStr}:<span class="flip-digit-wrap"><span class="flip-digit">${minTens}</span></span><span class="flip-digit-wrap"><span class="flip-digit">${minUnit}</span></span>`;
+    prevMinTens = minTens;
+    prevMinUnit = minUnit;
+    return;
+  }
 
-    setTimeout(()=>{
-        timeDom.innerHTML = `${weekStr} ${hourStr}:<span class="flip-digit-wrap"><span class="flip-digit">${minStr}</span></span>`;
-        prevMinute = minStr;
-        isFlipping = false;
-    },520);
+  const tensChange = minTens !== prevMinTens;
+  const unitChange = minUnit !== prevMinUnit;
+
+  let tensHtml = `<span class="flip-digit-wrap"><span class="flip-digit">${prevMinTens}</span>${ tensChange ? `<span class="flip-digit flip-digit-up">${minTens}</span>` : "" }</span>`;
+  let unitHtml = `<span class="flip-digit-wrap"><span class="flip-digit">${prevMinUnit}</span>${ unitChange ? `<span class="flip-digit flip-digit-up">${minUnit}</span>` : "" }</span>`;
+
+  timeDom.innerHTML = `${weekStr} ${hourStr}:${tensHtml}${unitHtml}`;
+
+  setTimeout(()=>{
+    timeDom.querySelectorAll('.flip-digit-up').forEach(el=>{
+      el.style.transform = 'translateY(0)';
+    })
+  },20);
+
+  setTimeout(()=>{
+    timeDom.innerHTML = `${weekStr} ${hourStr}:<span class="flip-digit-wrap"><span class="flip-digit">${minTens}</span></span><span class="flip-digit-wrap"><span class="flip-digit">${minUnit}</span></span>`;
+    prevMinTens = minTens;
+    prevMinUnit = minUnit;
+    isFlipping = false;
+  },480);
 }
 
 function getTimeParts(){
@@ -303,19 +310,21 @@ function getTimeParts(){
     const weekday = now.toLocaleDateString('en-US',{weekday:'long'});
     const hh = String(now.getHours()).padStart(2, '0');
     const mm = String(now.getMinutes()).padStart(2, '0');
-    return {weekday, hh, mm};
+    const minTens = mm[0];
+    const minUnit = mm[1];
+    return {weekday, hh, minTens, minUnit};
 }
 
-// 初始化
+// 初始化渲染
 const initTime = getTimeParts();
-renderTime(initTime.weekday, initTime.hh, initTime.mm, false);
+renderTime(initTime.weekday, initTime.hh, initTime.minTens, initTime.minUnit, false);
 
 function checkTimeUpdate(){
     if(isFlipping) return;
     const t = getTimeParts();
-    if(t.mm !== prevMinute){
+    if(t.minTens !== prevMinTens || t.minUnit !== prevMinUnit){
         isFlipping = true;
-        renderTime(t.weekday, t.hh, t.mm, true);
+        renderTime(t.weekday, t.hh, t.minTens, t.minUnit, true);
     }
 }
 setInterval(checkTimeUpdate, 1000);
@@ -358,8 +367,7 @@ const dots = wrap.querySelectorAll('.carousel-dots span');
 dots.forEach((dot, idx) => {
 dot.addEventListener('click', () => {
 dots.forEach(d => d.classList.remove('active'));
-dot.classList.remove('active');
-dot.classList.add('active');
+dots[idx].classList.add('active');
 });
 })
 </script>
