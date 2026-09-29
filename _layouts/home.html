@@ -144,22 +144,31 @@ left: 0;
 width: 100%;
 height: 80%;
 display: flex;
+flex-direction: column;
 align-items: center;
 justify-content: center;
+gap:12px;
 z-index: 10;
 pointer-events:none;
 }
-/* 文字强制单行，使用font-size-adjust自动缩放到适合宽度 */
-.carousel-time-text span {
+/* 主时间文字，强制单行，自动缩小 */
+.carousel-time-text .time-main {
 color:#ffffff;
 font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 font-weight:500;
 letter-spacing:1px;
-white-space: nowrap; /* 强制一行，禁止换行 */
+white-space: nowrap;
 text-shadow: none;
-/* 核心：自动缩放，容器宽度不够自动缩小字体 */
 font-size: clamp(16px, 12vw, 80px);
 line-height:1;
+}
+/* 打字机副标题 LIFE IS SHORT */
+.carousel-time-text .type-sub {
+color:#ffffff;
+font-family: 'Courier New', Courier, monospace;
+font-size:20px;
+white-space:nowrap;
+text-shadow: none;
 }
 @media(max-width:768px){
 .carousel-item img {
@@ -184,7 +193,8 @@ height:220px;
 </div>
 
 <div class="carousel-time-text">
-<span id="carouselTime"></span>
+<div class="time-main" id="carouselTime"></div>
+<div class="type-sub" id="typeText"></div>
 </div>
 
 <div class="carousel-dots">
@@ -194,6 +204,25 @@ height:220px;
 </div>
 </div>
 <script>
+// ===== 打字机音效生成 =====
+let audioCtx;
+function initAudio(){
+if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+function playTypeSound(){
+if(!audioCtx) return;
+const osc = audioCtx.createOscillator();
+const gain = audioCtx.createGain();
+osc.type = 'square';
+osc.frequency.value = 440;
+gain.gain.value = 0.04;
+osc.connect(gain);
+gain.connect(audioCtx.destination);
+osc.start();
+osc.stop(audioCtx.currentTime + 0.025);
+}
+
+// ===== 主时间更新 =====
 function updateCarouselTime(){
 const now = new Date();
 const weekday = now.toLocaleDateString('en-US',{weekday:'long'});
@@ -204,6 +233,34 @@ document.getElementById('carouselTime').innerText = `${weekday} ${hours}:${mins}
 updateCarouselTime();
 setInterval(updateCarouselTime,1000);
 
+// ===== 打字机 LIFE IS SHORT =====
+const targetStr = "LIFE IS SHORT";
+const el = document.getElementById('typeText');
+let idx = 0;
+let isDel = false;
+function typeWriter(){
+initAudio();
+if(!isDel){
+el.textContent = targetStr.substring(0, idx+1);
+playTypeSound();
+idx++;
+if(idx >= targetStr.length){
+isDel = true;
+setTimeout(typeWriter, 2000);
+return;
+}
+}else{
+el.textContent = targetStr.substring(0, idx-1);
+idx--;
+if(idx <= 0){
+isDel = false;
+}
+}
+setTimeout(typeWriter, isDel ? 60 : 120);
+}
+typeWriter();
+
+// ===== 原有轮播代码 =====
 const wrap = document.querySelector('.home-carousel-wrap');
 const carousel = wrap.querySelector('.home-carousel');
 const dots = wrap.querySelectorAll('.carousel-dots span');
