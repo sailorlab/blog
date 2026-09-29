@@ -186,8 +186,8 @@ font-size:20px;
 white-space:nowrap;
 text-shadow: none;
 }
-/* 粒子画布，叠加在文字上方，同位置 */
-#particleOverlayCanvas{
+/* 烟雾粒子画布，叠加在文字上层 */
+#smokeParticleCanvas{
 position: absolute;
 top:0;
 left:0;
@@ -210,15 +210,14 @@ height:calc(100% + 150px);
 <p>{{ site.description }}</p>
 </div>
 <div class="parallax-wrap">
-<!-- 底层海报图，视差滚动，把截图保存为 jeep-poster.jpg 上传assets -->
+<!-- 底层海报图，视差滚动 -->
 <img class="parallax-bg-img" src="{{ site.baseurl }}/assets/jeep-poster.jpg" alt="Jeep田野蓝调">
-<!-- 上层视频固定，不滚动 -->
+<!-- 上层视频固定 -->
 <video class="bg-video" autoplay muted loop playsinline preload="auto">
 <source src="{{ site.baseurl }}/assets/jeep-field-blue.mp4" type="video/mp4">
 </video>
 <div class="carousel-time-text">
-    <!-- 粒子叠加画布 -->
-    <canvas id="particleOverlayCanvas"></canvas>
+    <canvas id="smokeParticleCanvas"></canvas>
     <!-- 原生文字保留，字体完全不变 -->
     <div class="time-main" id="carouselTime"></div>
     <div class="type-sub" id="typeText"></div>
@@ -262,15 +261,18 @@ height:calc(100% + 150px);
 </div>
 </div>
 <script>
-const canvas = document.getElementById('particleOverlayCanvas');
+const canvas = document.getElementById('smokeParticleCanvas');
 const ctx = canvas.getContext('2d');
 let particles = [];
 let isAnimating = false;
-const particleColor = "#ffffff";
-const particleRadius = 2.2;
-const pixelStep = 6;
 
-// 画布尺寸自适应
+// 烟雾粒子参数
+const particleRadius = 3.2;
+const pixelStep = 7;
+const windPower = 1.2; //风力大小，往右吹
+const fadeSpeed = 0.012;
+
+// 画布自适应
 function resizeCanvas(){
   const wrap = document.querySelector('.carousel-time-text');
   canvas.width = wrap.clientWidth;
@@ -279,7 +281,7 @@ function resizeCanvas(){
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// 获取文字轮廓粒子点位（复用time-main的字体样式）
+// 提取文字轮廓点位，和time-main字体保持一致
 function getTextPoints(text){
   const offCanvas = document.createElement('canvas');
   const offCtx = offCanvas.getContext('2d');
@@ -303,7 +305,7 @@ function getTextPoints(text){
   return points;
 }
 
-class Particle {
+class SmokeParticle {
   constructor(targetX, targetY){
     this.x = targetX;
     this.y = targetY;
@@ -311,56 +313,63 @@ class Particle {
     this.originY = targetY;
     this.vx = 0;
     this.vy = 0;
+    this.alpha = 1;
   }
-  scatterOut(){
-    const angle = Math.random() * Math.PI * 2;
-    const speed = 2 + Math.random()*4;
-    this.vx = Math.cos(angle)*speed;
-    this.vy = Math.sin(angle)*speed;
+  // 风吹消散：向右飘动 + 透明度衰减
+  windAway(){
+    this.vx = windPower + Math.random() * 1.0;
+    this.vy = (Math.random()-0.5)*0.6;
   }
-  assembleToTarget(){
-    this.vx = (this.originX - this.x) * 0.08;
-    this.vy = (this.originY - this.y) * 0.08;
+  // 烟雾汇聚：粒子从右侧飘回文字位置
+  windGather(){
+    this.vx = (this.originX - this.x) * 0.045;
+    this.vy = (this.originY - this.y) * 0.045;
   }
   update(){
     this.x += this.vx;
     this.y += this.vy;
-    this.vx *= 0.94;
-    this.vy *= 0.94;
+    this.alpha -= fadeSpeed;
+    this.vx *= 0.98;
+    this.vy *= 0.98;
   }
   draw(){
     ctx.beginPath();
     ctx.arc(this.x, this.y, particleRadius, 0, Math.PI*2);
-    ctx.fillStyle = particleColor;
+    ctx.fillStyle = `rgba(255,255,255,${this.alpha})`;
     ctx.fill();
   }
 }
 
-// 粒子动画：消散 -> 停顿 -> 汇聚
-async function runParticleEffect(oldText, newText){
+// 完整烟雾动画流程：旧文字被风吹散 → 短暂停顿 → 新文字烟雾汇聚浮现
+async function runSmokeEffect(oldText, newText){
   if(isAnimating) return;
   isAnimating = true;
   particles = [];
-  // 旧文字粒子生成，向外飘散
+
+  // 1. 旧文字粒子生成，风吹向右消散
   const oldPoints = getTextPoints(oldText);
   oldPoints.forEach(pt => {
-    const p = new Particle(pt.x, pt.y);
+    const p = new SmokeParticle(pt.x, pt.y);
     particles.push(p);
   });
-  particles.forEach(p=>p.scatterOut());
-  await sleep(400);
+  particles.forEach(p => p.windAway());
+  await sleep(650);
+
   particles = [];
-  await sleep(200);
-  // 新文字粒子，从四周飞入汇聚
+  await sleep(180);
+
+  // 2. 新文字粒子从右侧远处出发，随风飘回汇聚
   const newPoints = getTextPoints(newText);
   newPoints.forEach(pt => {
-    const p = new Particle(pt.x, pt.y);
-    p.x = canvas.width/2 + (Math.random()-0.5)*400;
-    p.y = canvas.height/2 + (Math.random()-0.5)*400;
+    const p = new SmokeParticle(pt.x, pt.y);
+    p.x = canvas.width * 0.65 + Math.random() * canvas.width * 0.35;
+    p.y = pt.y + (Math.random()-0.5)*30;
+    p.alpha = 0;
     particles.push(p);
   });
-  particles.forEach(p=>p.assembleToTarget());
-  await sleep(400);
+  particles.forEach(p => p.windGather());
+  await sleep(700);
+
   particles = [];
   isAnimating = false;
 }
@@ -368,7 +377,7 @@ function sleep(ms){
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// 渲染循环
+// 全局渲染循环
 function renderLoop(){
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   particles.forEach(p=>{
@@ -379,7 +388,7 @@ function renderLoop(){
 }
 renderLoop();
 
-// ===== 主时间更新（原生DOM文字保留） =====
+// ===== 时间逻辑（原生文字DOM不变） =====
 let lastTimeText = "";
 let lastMinute = new Date().getMinutes();
 const timeDom = document.getElementById('carouselTime');
@@ -391,7 +400,6 @@ function getTimeStr(){
   const mm = String(now.getMinutes()).padStart(2, '0');
   return `${weekday} ${hh}:${mm}`;
 }
-// 初始化
 lastTimeText = getTimeStr();
 timeDom.innerText = lastTimeText;
 
@@ -401,8 +409,7 @@ function checkTimeUpdate(){
   const newStr = getTimeStr();
   if(thisMin !== lastMinute){
     lastMinute = thisMin;
-    // 先播放粒子消散重组特效，再更新DOM文字
-    runParticleEffect(lastTimeText, newStr).then(()=>{
+    runSmokeEffect(lastTimeText, newStr).then(()=>{
       timeDom.innerText = newStr;
       lastTimeText = newStr;
     });
