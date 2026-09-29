@@ -105,7 +105,6 @@ margin-left:0;
   }
 }
 </style>
-
 <!-- 通栏视差模块 -->
 <style>
 .parallax-wrap{
@@ -171,15 +170,10 @@ gap:12px;
 z-index: 10;
 pointer-events:none;
 }
-.carousel-time-text .time-main {
-color:#ffffff;
-font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-font-weight:500;
-letter-spacing:1px;
-white-space: nowrap;
-text-shadow: none;
-font-size: clamp(16px, 12vw, 80px);
-line-height:1;
+/* 粒子画布，继承原有文字样式 */
+#particleTimeCanvas{
+display:block;
+position:relative;
 }
 .carousel-time-text .type-sub {
 color:#ffffff;
@@ -197,32 +191,28 @@ height:calc(100% + 150px);
 }
 }
 </style>
-
 <div class="home-intro">
 <h1>{{ site.title }}</h1>
 <p>{{ site.description }}</p>
 </div>
-
 <div class="parallax-wrap">
-  <!-- 底层海报图，视差滚动，把截图保存为 jeep-poster.jpg 上传assets -->
-  <img class="parallax-bg-img" src="{{ site.baseurl }}/assets/jeep-poster.jpg" alt="Jeep田野蓝调">
-  <!-- 上层视频固定，不滚动 -->
-  <video class="bg-video" autoplay muted loop playsinline preload="auto">
-    <source src="{{ site.baseurl }}/assets/jeep-field-blue.mp4" type="video/mp4">
-  </video>
-
-  <div class="carousel-time-text">
-    <div class="time-main" id="carouselTime"></div>
-    <div class="type-sub" id="typeText"></div>
-  </div>
-
-  <div class="carousel-dots">
-    <span data-index="0" class="active"></span>
-    <span data-index="1"></span>
-    <span data-index="2"></span>
-  </div>
+<!-- 底层海报图，视差滚动，把截图保存为 jeep-poster.jpg 上传assets -->
+<img class="parallax-bg-img" src="{{ site.baseurl }}/assets/jeep-poster.jpg" alt="Jeep田野蓝调">
+<!-- 上层视频固定，不滚动 -->
+<video class="bg-video" autoplay muted loop playsinline preload="auto">
+<source src="{{ site.baseurl }}/assets/jeep-field-blue.mp4" type="video/mp4">
+</video>
+<div class="carousel-time-text">
+<!-- 替换原来的time-main div为Canvas粒子画布 -->
+<canvas id="particleTimeCanvas"></canvas>
+<div class="type-sub" id="typeText"></div>
 </div>
-
+<div class="carousel-dots">
+<span data-index="0" class="active"></span>
+<span data-index="1"></span>
+<span data-index="2"></span>
+</div>
+</div>
 <div class="container">
 <div class="posts-timeline">
     {% assign postsByYear = site.posts | group_by_exp: "post", "post.date | date: '%Y'" %}
@@ -255,20 +245,158 @@ height:calc(100% + 150px);
     {% endfor %}
 </div>
 </div>
-
 <script>
-// ===== 主时间更新 =====
-function updateCarouselTime(){
-const now = new Date();
-const weekday = now.toLocaleDateString('en-US',{weekday:'long'});
-const hours = String(now.getHours()).padStart(2,'0');
-const mins = String(now.getMinutes()).padStart(2,'0');
-document.getElementById('carouselTime').innerText = `${weekday} ${hours}:${mins}`;
-}
-updateCarouselTime();
-setInterval(updateCarouselTime,1000);
+// ========= 粒子文字引擎：分钟变更 → 消散、重组 =========
+const canvas = document.getElementById('particleTimeCanvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let currentText = "";
+let isAnimating = false;
 
-// ===== 打字机 LIFE IS SHORT =====
+// 和你原来 .time-main 字体保持完全一致
+const fontCSS = `500 clamp(16px,12vw,80px) "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+const particleColor = "#ffffff";
+const particleRadius = 2.2;
+const pixelStep = 6; //粒子密度，越小越细腻
+
+// 画布自适应大小
+function resizeCanvas(){
+  const wrap = document.querySelector('.carousel-time-text');
+  const w = wrap.clientWidth * 0.92;
+  const h = wrap.clientHeight * 0.6;
+  canvas.width = w;
+  canvas.height = h;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// 提取文字像素点位，生成粒子目标位置
+function getTextParticlePoints(text){
+  const offCanvas = document.createElement('canvas');
+  const offCtx = offCanvas.getContext('2d');
+  offCanvas.width = canvas.width;
+  offCanvas.height = canvas.height;
+  offCtx.font = fontCSS;
+  offCtx.fillStyle="#fff";
+  offCtx.textAlign="center";
+  offCtx.textBaseline="middle";
+  offCtx.fillText(text, offCanvas.width/2, offCanvas.height/2);
+  const imgData = offCtx.getImageData(0,0,offCanvas.width,offCanvas.height);
+  const points = [];
+  for(let y=0; y < offCanvas.height; y += pixelStep){
+    for(let x=0; x < offCanvas.width; x += pixelStep){
+      const i = (y * offCanvas.width + x) *4;
+      if(imgData.data[i+3] > 128){
+        points.push({x,y});
+      }
+    }
+  }
+  return points;
+}
+
+class Particle {
+  constructor(targetX, targetY){
+    this.x = targetX;
+    this.y = targetY;
+    this.originX = targetX;
+    this.originY = targetY;
+    this.vx = 0;
+    this.vy = 0;
+  }
+  // 粒子向外消散
+  scatterOut(){
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 2 + Math.random()*4;
+    this.vx = Math.cos(angle)*speed;
+    this.vy = Math.sin(angle)*speed;
+  }
+  // 粒子汇聚到目标文字位置
+  assembleToTarget(){
+    this.vx = (this.originX - this.x) * 0.08;
+    this.vy = (this.originY - this.y) * 0.08;
+  }
+  update(){
+    this.x += this.vx;
+    this.y += this.vy;
+    this.vx *= 0.94;
+    this.vy *= 0.94;
+  }
+  draw(){
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, particleRadius, 0, Math.PI*2);
+    ctx.fillStyle = particleColor;
+    ctx.fill();
+  }
+}
+
+// 文字切换动画时序：消散 → 短暂空白 → 粒子汇聚
+async function switchTimeText(newText){
+  if(isAnimating) return;
+  isAnimating = true;
+  // 旧文字粒子散开
+  particles.forEach(p => p.scatterOut());
+  await sleep(400);
+  particles = [];
+  currentText = newText;
+  // 获取新文字粒子坐标
+  const targetPoints = getTextParticlePoints(newText);
+  for(let pt of targetPoints){
+    const p = new Particle(pt.x, pt.y);
+    // 粒子从四周远处飞入
+    p.x = canvas.width/2 + (Math.random()-0.5)*400;
+    p.y = canvas.height/2 + (Math.random()-0.5)*400;
+    particles.push(p);
+  }
+  await sleep(200);
+  // 开始汇聚成新文字
+  particles.forEach(p => p.assembleToTarget());
+  await sleep(400);
+  isAnimating = false;
+}
+function sleep(ms){
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// 全局渲染循环
+function renderLoop(){
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p=>{
+    p.update();
+    p.draw();
+  })
+  requestAnimationFrame(renderLoop);
+}
+renderLoop();
+
+// 获取星期+时间字符串
+function getTimeStr(){
+  const now = new Date();
+  const weekday = now.toLocaleDateString('en-US',{weekday:'long'});
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  return `${weekday} ${hh}:${mm}`;
+}
+
+// 初始化页面加载时直接渲染当前时间
+currentText = getTimeStr();
+const initPoints = getTextParticlePoints(currentText);
+initPoints.forEach(pt=> particles.push(new Particle(pt.x, pt.y)));
+
+// 每分钟检测，分钟变化就播放粒子动画
+let lastMinute = new Date().getMinutes();
+function checkTimeUpdate(){
+  const now = new Date();
+  const thisMin = now.getMinutes();
+  const newStr = getTimeStr();
+  if(thisMin !== lastMinute){
+    lastMinute = thisMin;
+    switchTimeText(newStr);
+  }
+}
+checkTimeUpdate();
+setInterval(checkTimeUpdate, 1000);
+
+// ===== 打字机 LIFE IS SHORT（保留原样）=====
 const targetStr = "LIFE IS SHORT";
 const el = document.getElementById('typeText');
 let idx = 0;
@@ -281,28 +409,26 @@ setTimeout(typeWriter,120);
 }
 typeWriter();
 
-// ===== 图片视差（图片不会有浏览器渲染bug） =====
+// ===== 图片视差（原样保留）=====
 const bgImg = document.querySelector('.parallax-bg-img');
 const parallaxWrap = document.querySelector('.parallax-wrap');
 const parallaxStrength = 0.3;
 const maxMove = 60;
-
 function updateParallax(){
-  const rect = parallaxWrap.getBoundingClientRect();
-  let moveY = rect.top * parallaxStrength;
-  moveY = Math.max(-maxMove, Math.min(moveY, maxMove));
-  bgImg.style.transform = `translateY(${moveY}px) translateZ(0)`;
+const rect = parallaxWrap.getBoundingClientRect();
+let moveY = rect.top * parallaxStrength;
+moveY = Math.max(-maxMove, Math.min(moveY, maxMove));
+bgImg.style.transform = `translateY(${moveY}px) translateZ(0)`;
 }
-
 function parallaxLoop(){
-  updateParallax();
-  requestAnimationFrame(parallaxLoop);
+updateParallax();
+requestAnimationFrame(parallaxLoop);
 }
 parallaxLoop();
 window.addEventListener('scroll', updateParallax, { passive:true });
 window.addEventListener('resize', updateParallax);
 
-// ===== 圆点点击逻辑 =====
+// ===== 圆点点击逻辑（原样保留）=====
 const wrap = document.querySelector('.parallax-wrap');
 const dots = wrap.querySelectorAll('.carousel-dots span');
 dots.forEach((dot, idx) => {
