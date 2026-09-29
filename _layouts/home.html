@@ -108,7 +108,6 @@ margin-left:0;
 
 <!-- 通栏视差模块 -->
 <style>
-/* 通栏外层容器，固定高度，溢出隐藏 */
 .parallax-wrap{
 width:100vw;
 overflow:hidden;
@@ -116,17 +115,27 @@ position:relative;
 height:380px;
 margin:40px 0 60px;
 }
-/* 视频层：加高尺寸，方便上下视差移动，取消top定位，改用transform控制 */
-.bg-video{
+/* 底层海报图片：负责视差滚动 */
+.parallax-bg-img{
 width:100vw;
 height:calc(100% + 120px);
 object-fit: cover;
 display:block;
 position:absolute;
 left:0;
-/* GPU加速 */
+top:0;
 transform: translateZ(0);
 will-change: transform;
+}
+/* 上层视频：固定不动，不参与视差 */
+.bg-video{
+width:100vw;
+height:100%;
+object-fit: cover;
+display:block;
+position:absolute;
+left:0;
+top:0;
 }
 .carousel-dots {
 position:absolute;
@@ -183,7 +192,7 @@ text-shadow: none;
 .parallax-wrap{
 height:220px;
 }
-.bg-video{
+.parallax-bg-img{
 height:calc(100% + 80px);
 }
 }
@@ -194,25 +203,26 @@ height:calc(100% + 80px);
 <p>{{ site.description }}</p>
 </div>
 
-<!-- 通栏视频区域 -->
 <div class="parallax-wrap">
-<video class="bg-video" autoplay muted loop playsinline preload="auto">
-  <source src="{{ site.baseurl }}/assets/jeep-field-blue.mp4" type="video/mp4">
-</video>
+  <!-- 底层海报图，视差滚动，把截图保存为 jeep-poster.jpg 上传assets -->
+  <img class="parallax-bg-img" src="{{ site.baseurl }}/assets/jeep-poster.jpg" alt="Jeep田野蓝调">
+  <!-- 上层视频固定，不滚动 -->
+  <video class="bg-video" autoplay muted loop playsinline preload="auto">
+    <source src="{{ site.baseurl }}/assets/jeep-field-blue.mp4" type="video/mp4">
+  </video>
 
-<div class="carousel-time-text">
-<div class="time-main" id="carouselTime"></div>
-<div class="type-sub" id="typeText"></div>
+  <div class="carousel-time-text">
+    <div class="time-main" id="carouselTime"></div>
+    <div class="type-sub" id="typeText"></div>
+  </div>
+
+  <div class="carousel-dots">
+    <span data-index="0" class="active"></span>
+    <span data-index="1"></span>
+    <span data-index="2"></span>
+  </div>
 </div>
 
-<div class="carousel-dots">
-<span data-index="0" class="active"></span>
-<span data-index="1"></span>
-<span data-index="2"></span>
-</div>
-</div>
-
-<!-- 文章列表保持1100px容器 -->
 <div class="container">
 <div class="posts-timeline">
     {% assign postsByYear = site.posts | group_by_exp: "post", "post.date | date: '%Y'" %}
@@ -258,7 +268,7 @@ document.getElementById('carouselTime').innerText = `${weekday} ${hours}:${mins}
 updateCarouselTime();
 setInterval(updateCarouselTime,1000);
 
-// ===== 打字机 LIFE IS SHORT，页面载入只执行一次 =====
+// ===== 打字机 LIFE IS SHORT =====
 const targetStr = "LIFE IS SHORT";
 const el = document.getElementById('typeText');
 let idx = 0;
@@ -271,31 +281,24 @@ setTimeout(typeWriter,120);
 }
 typeWriter();
 
-// ===== 修复后的视差滚动逻辑，使用requestAnimationFrame =====
-const videoBg = document.querySelector('.bg-video');
+// ===== 图片视差（图片不会有浏览器渲染bug） =====
+const bgImg = document.querySelector('.parallax-bg-img');
 const parallaxWrap = document.querySelector('.parallax-wrap');
-// 视差强度，数值越大拉动越强，推荐 0.2~0.4
 const parallaxStrength = 0.3;
+const maxMove = 60;
 
 function updateParallax(){
   const rect = parallaxWrap.getBoundingClientRect();
-  // 元素在视口中的位置，计算位移
-  const scrollY = rect.top;
-  let moveY = scrollY * parallaxStrength;
-  // 限制位移范围，防止黑边
-  const maxMove = 60;
+  let moveY = rect.top * parallaxStrength;
   moveY = Math.max(-maxMove, Math.min(moveY, maxMove));
-  videoBg.style.transform = `translateY(${moveY}px) translateZ(0)`;
+  bgImg.style.transform = `translateY(${moveY}px) translateZ(0)`;
 }
 
-// 使用requestAnimationFrame，保证流畅渲染
 function parallaxLoop(){
   updateParallax();
   requestAnimationFrame(parallaxLoop);
 }
 parallaxLoop();
-
-// 监听滚动、窗口大小，passive提升移动端性能
 window.addEventListener('scroll', updateParallax, { passive:true });
 window.addEventListener('resize', updateParallax);
 
