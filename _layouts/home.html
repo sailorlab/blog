@@ -188,19 +188,21 @@ font-size:20px;
 white-space:nowrap;
 text-shadow: none;
 }
-/* ========== 双位独立翻牌滚动数字样式 ========== */
+/* ========== 【修复】双位独立翻牌滚动数字样式 ========== */
 .flip-digit-wrap{
 position:relative;
 overflow:hidden;
-height:1em;
+height:1.1em; /* 调高容器高度，避免文字截断 */
 display:inline-block;
 vertical-align:baseline;
+margin:0 3px; /* 两个分钟数字之间增加间距 */
 }
 .flip-digit{
 position:absolute;
 width:100%;
 text-align:center;
 left:0;
+bottom:0;
 transition: transform 0.45s cubic-bezier(0.2, 0, 0.3, 1);
 }
 .flip-digit-up{
