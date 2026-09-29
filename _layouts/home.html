@@ -101,18 +101,12 @@ position: relative;
 overflow: hidden;
 border-radius:12px;
 margin:40px 0 60px;
-}
-.home-carousel {
-display: flex;
-transition: transform 0.6s ease;
-}
-.carousel-item {
-width: 100%;
-flex-shrink: 0;
-}
-.carousel-item img {
-width:100%;
 height:380px;
+}
+/* 替换为视频样式，铺满容器 */
+.bg-video {
+width:100%;
+height:100%;
 object-fit: cover;
 display:block;
 }
@@ -136,7 +130,7 @@ transition: 0.3s;
 .carousel-dots span.active {
 background:#fff;
 }
-/* 时间外层容器：高度占图片80%，底部20%留给小圆点 */
+/* 时间外层容器：高度占视频80%，底部20%留给小圆点 */
 .carousel-time-text {
 position: absolute;
 top: 0;
@@ -171,26 +165,16 @@ white-space:nowrap;
 text-shadow: none;
 }
 @media(max-width:768px){
-.carousel-item img {
+.home-carousel-wrap {
 height:220px;
-  }
+}
 }
 </style>
 <div class="home-carousel-wrap">
-<div class="home-carousel">
-<div class="carousel-item">
-<img src="{{ site.baseurl }}/assets/images/banner1.jpg" alt="轮播图">
-</div>
-<div class="carousel-item">
-<img src="{{ site.baseurl }}/assets/images/banner2.jpg" alt="轮播图">
-</div>
-<div class="carousel-item">
-<img src="{{ site.baseurl }}/assets/images/banner2.jpg" alt="轮播图">
-</div>
-<div class="carousel-item">
-<img src="{{ site.baseurl }}/assets/images/banner1.jpg" alt="轮播图">
-</div>
-</div>
+<!-- 15s Jeep田野蓝调视频，替换src为你的视频地址 -->
+<video class="bg-video" autoplay muted loop playsinline>
+  <source src="/assets/jeep-field-blue.mp4" type="video/mp4">
+</video>
 
 <div class="carousel-time-text">
 <div class="time-main" id="carouselTime"></div>
@@ -229,71 +213,14 @@ setTimeout(typeWriter,120);
 }
 typeWriter();
 
-// ===== 原有轮播代码 =====
+// ===== 保留圆点点击逻辑（可以用来切换视频/素材，当前单视频，你后续扩展可用） =====
 const wrap = document.querySelector('.home-carousel-wrap');
-const carousel = wrap.querySelector('.home-carousel');
 const dots = wrap.querySelectorAll('.carousel-dots span');
-const imgs = wrap.querySelectorAll('.carousel-item img');
-const realTotal = dots.length;
-let current = 0;
-let timer;
-let isAnimating = false;
-
-function goTo(index) {
-if(isAnimating) return;
-isAnimating = true;
-current = index;
-carousel.style.transform = `translateX(-${current * 100}%)`;
-dots.forEach(d => d.classList.remove('active'));
-if(current < realTotal){
-dots[current].classList.add('active');
-  }
-setTimeout(()=>{
-isAnimating = false;
-if(current === realTotal){
-carousel.style.transition = 'none';
-current = 0;
-carousel.style.transform = `translateX(0%)`;
-carousel.offsetHeight;
-carousel.style.transition = 'transform 0.6s ease';
-dots[0].classList.add('active');
-    }
-  },600);
-}
-
-function autoPlay() {
-timer = setInterval(() => {
-current = current + 1;
-goTo(current);
-  }, 6000);
-}
-
 dots.forEach((dot, idx) => {
 dot.addEventListener('click', () => {
-clearInterval(timer);
-goTo(idx);
-autoPlay();
-  });
+dots.forEach(d => d.classList.remove('active'));
+dot.classList.add('active');
 });
-
-wrap.addEventListener('mouseenter', ()=>{
-clearInterval(timer);
-})
-wrap.addEventListener('mouseleave', ()=>{
-autoPlay();
-})
-
-let loadedCount = 0;
-imgs.forEach(img => {
-if(img.complete){
-loadedCount++;
-if(loadedCount >= imgs.length) autoPlay();
-  }else{
-img.onload = () => {
-loadedCount++;
-if(loadedCount >= imgs.length) autoPlay();
-    }
-  }
 })
 </script>
 
