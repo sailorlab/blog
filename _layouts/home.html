@@ -267,15 +267,15 @@ let particles = [];
 let isAnimating = false;
 
 // 烟雾物理参数
-const particleRadius = 3;        // 基础粒子大小
-const pixelStep = 7;              // 采样密度，越小烟雾越细腻
+const particleRadius = 1;        // 基础粒子大小
+const pixelStep = 1;              // 采样密度，越小烟雾越细腻
 const baseWind = 0.35;            // 基础向右风力
 const gustStrength = 0.55;        // 阵风强度
 const turbulence = 0.35;          // 横向/纵向随机扰动，更真实烟雾
 const driftSpread = 0.25;         // 粒子云边缘扩散
 const fadeSpeed = 0.007;          // 淡出速度
 const particleLife = 90;          // 粒子存活帧数
-const cloudCoherence = 0.82;      // 烟雾团簇保持程度，越高越像一团烟
+const cloudCoherence = 3.82;      // 烟雾团簇保持程度，越高越像一团烟
 
 function resizeCanvas(){
   const wrap = document.querySelector('.carousel-time-text');
