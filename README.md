@@ -1,35 +1,69 @@
 # 我的个人博客（Jekyll + GitHub Pages）
-站点地址：https://sailorlab.github.io/blog/
+
+站点地址：[https://sailorlab.github.io/blog/](https://sailorlab.github.io/blog/)
 
 ## 📖 站点说明
+
 基于Jekyll搭建的静态博客，部署在GitHub Pages。
 文章存放目录：`_posts/`
 图片资源目录：`assets/images/`
 页面模板目录：根目录、`_layouts/`
 
+> 
+> 全局样式约定：`.container { max-width: 1100px; }`；文章列表统一两列 Grid 网格布局，支持加载更多；文章缩略图宽度 300px。
+
 ## ✅ 页面清单
-- index.html：入口，引用 home.html
-- home.html：首页文章列表
-- archives.html：归档页
-- tags.html：标签页
-- categories/life.html：关于生活 分类页
-- categories/work.html：工作及其他 分类页
-- categories/hobby.html：一点兴趣 分类页
-- about.html：关于页面
+
+| 页面文件 | 页面标题 | 访问路径(permalink) | 功能说明 | 状态 |
+| --- | --- | --- | --- | --- |
+| `index.md` | 首页 | `/` | 网站首页，文章列表两列网格、加载更多；顶部标题「破晓 PO.XIAO」打字机动画；轮播图带实时时间 + 文字打字效果 | ✅ 完成 |
+| `archives.md` | 文章归档 | `/archives/` | 全部文章归档列表，按年份分组展示；两列网格卡片，和首页样式统一 | ✅ 完成 |
+| `tags.md` | 标签页 | `/tags/` | 标签云，点击标签筛选对应文章；文章列表两列网格，与首页布局对齐 | ✅ 完成 |
+| `categories/life.md` | 关于生活 | `/categories/life/` | Life分类文章列表，两列网格；缩略图加宽定制 | ✅ 完成 |
+| `categories/work.md` | 工作及其他 | `/categories/work/` | Work分类文章列表，两列网格，样式与首页统一 | ✅ 完成 |
+| `categories/hobby.md` | 一点兴趣 | `/categories/hobby/` | Hobby分类文章列表，两列网格，样式与首页统一 | ✅ 完成 |
+| `about.md` | 关于页面 | `/about/` | 个人介绍页面 | ✅ 完成 |
+
+## 📌 页面样式统一规范
+
+1. 容器：`.container` 固定最大宽度 `1100px`，左右自动居中，所有页面内容宽度统一，和顶部轮播左右对齐
+2. 文章列表：CSS Grid `repeat(2,1fr)` 两列布局；移动端自动变为单列
+3. 文章卡片：`post-card`，图文并排；缩略图默认宽度 `300px`，移动端自适应100%宽度
+4. 动画：首页标题打字机（200ms/字符，打完停留5s循环，带下划线闪烁光标）；首页轮播自带实时时间更新 + 文字打字效果
 
 ## 📌 Jekyll 重大踩坑记录（重点！）
-> Bug现象：首页/分类列表点击文章404，浏览器地址缺少 `/blog` 前缀，
-> 正确地址：`https://sailorlab.github.io/blog/2026/09/25/中秋/`
-> 错误地址：`https://sailorlab.github.io/2026/09/25/中秋/`
+
+> 
+> Bug现象：首页/分类列表点击文章404，浏览器地址缺少 `/blog` 前缀
+> 正确地址：`[https://sailorlab.github.io/blog/2026/09/25/](https://sailorlab.github.io/blog/2026/09/25/)中秋/`
+> 错误地址：`[https://sailorlab.github.io/2026/09/25/](https://sailorlab.github.io/2026/09/25/)中秋/`
 
 ### 问题根源
+
 分类页面最初使用 `layout: page`，独立page布局渲染环境异常，`{{ post.url }}` 不会自动拼接 `site.baseurl`（`/blog`）。
 首页虽然用`layout: default`，但`{{ post.url }}`同样存在丢失baseurl风险，因此全站列表链接统一兜底加固。
 同时 `layout: page` 不会加载 `default.html` 的顶部导航栏，页面缺少头像菜单。
 
 ### ✅ 强制编码规范（新增页面必须遵守）
+
 1. **所有页面 Front Matter，布局必须写 `layout: default`，禁止使用 `layout: page`**
-   静态页面（about）、列表页面（首页/归档/分类/标签）全部统一。
+静态页面（about）、列表页面（首页/归档/分类/标签）全部统一。
 2. **所有文章列表的跳转链接，固定使用兜底写法：**
-```liquid
+
+```
 <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a>
+```
+
+## 📋 待做事项
+
+- 将页面链接添加至 Header 顶部导航
+- 将页面链接添加至页脚导航
+- 本地启动 Jekyll，逐页面预览校验：布局、加载更多、标签筛选交互
+- 按需微调卡片间距、字体大小、缩略图尺寸
+
+## 🔧 调试提示
+
+页面出现布局错乱、加载更多失效等问题，直接提交对应页面源码用于排查。
+
+直接复制全部内容粘贴进你的 `README.md` 即可。
+如果你需要，我可以再加一段本地运行jekyll的启动命令。
