@@ -60,13 +60,13 @@ margin-left:6px;
 .posts-timeline {
 }
 .timeline-year-group {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 30px;
-  width:100%; /* 年份组撑满父容器container，和轮播同宽 */
+display: grid;
+grid-template-columns: repeat(2, 1fr);
+gap: 30px;
+width:100%; /* 年份组撑满父容器container，和轮播同宽 */
 }
 .timeline-year {
-  grid-column: 1 / -1;
+grid-column: 1 / -1;
 }
 .timeline-year-group .post-card {
 border-bottom: 1px solid #e5e5e5;
@@ -142,11 +142,28 @@ transition: 0.3s;
 .carousel-dots span.active {
 background:#fff;
 }
+/* ========== 轮播居中时间文字 ========== */
+.carousel-time-text {
+position:absolute;
+top:50%;
+left:50%;
+transform: translate(-50%,-50%);
+font-size:30px;
+color:#ffffff;
+text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
+z-index: 10;
+pointer-events:none;
+font-weight:500;
+letter-spacing:1px;
+}
 /* 移动端适配 */
 @media(max-width:768px){
 .carousel-item img {
 height:220px;
   }
+.carousel-time-text {
+font-size:24px;
+}
 }
 </style>
 <div class="home-carousel-wrap">
@@ -165,6 +182,8 @@ height:220px;
 <img src="{{ site.baseurl }}/assets/images/banner1.jpg" alt="轮播图">
 </div>
 </div>
+<!-- 居中时间显示 -->
+<div class="carousel-time-text" id="carouselTime"></div>
 <!-- 底部小圆点（只3个，不含复制的那张） -->
 <div class="carousel-dots">
 <span data-index="0" class="active"></span>
@@ -173,6 +192,18 @@ height:220px;
 </div>
 </div>
 <script>
+// 更新轮播时间函数 格式：Tuesday 10:15
+function updateCarouselTime(){
+const now = new Date();
+// 星期英文全称
+const weekday = now.toLocaleDateString('en-US',{weekday:'long'});
+const hours = String(now.getHours()).padStart(2,'0');
+const mins = String(now.getMinutes()).padStart(2,'0');
+document.getElementById('carouselTime').innerText = `${weekday} ${hours}:${mins}`;
+}
+updateCarouselTime();
+setInterval(updateCarouselTime,1000);
+
 const wrap = document.querySelector('.home-carousel-wrap');
 const carousel = wrap.querySelector('.home-carousel');
 const dots = wrap.querySelectorAll('.carousel-dots span');
