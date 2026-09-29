@@ -4,6 +4,12 @@ layout: default
 <style>
 * {
 box-sizing: border-box;
+margin:0;
+padding:0;
+}
+body{
+margin:0;
+padding:0;
 }
 .post-card {
 display: flex;
@@ -67,6 +73,16 @@ grid-column: 1 / -1;
 .timeline-year-group .post-card {
 border-bottom: 1px solid #e5e5e5;
 }
+.container{
+max-width:1100px;
+margin:0 auto;
+padding:0 20px;
+}
+.home-intro{
+max-width:1100px;
+margin:40px auto;
+padding:0 20px;
+}
 @media (max-width:640px) {
 .timeline-year-group {
 grid-template-columns: 1fr;
@@ -89,25 +105,27 @@ margin-left:0;
   }
 }
 </style>
-<div class="container">
-<div class="home-intro">
-<h1>{{ site.title }}</h1>
-<p>{{ site.description }}</p>
-</div>
+
+<!-- ✅ 通栏视差视频模块，放在container外面，撑满屏幕左右 -->
 <style>
-.home-carousel-wrap {
-width: 100%;
-position: relative;
-overflow: hidden;
-border-radius:12px;
-margin:40px 0 60px;
+/* 通栏外层 */
+.parallax-wrap{
+width:100vw;
+overflow:hidden;
+position:relative;
 height:380px;
+margin:40px 0 60px;
 }
-.bg-video {
-width:100%;
-height:100%;
+/* 视差视频层 */
+.bg-video{
+width:100vw;
+height:calc(100% + 120px);
 object-fit: cover;
 display:block;
+position:absolute;
+top:-60px;
+left:0;
+will-change: transform;
 }
 .carousel-dots {
 position:absolute;
@@ -161,14 +179,25 @@ white-space:nowrap;
 text-shadow: none;
 }
 @media(max-width:768px){
-.home-carousel-wrap {
+.parallax-wrap{
 height:220px;
+}
+.bg-video{
+height:calc(100% + 80px);
+top:-40px;
 }
 }
 </style>
-<div class="home-carousel-wrap">
+
+<div class="home-intro">
+<h1>{{ site.title }}</h1>
+<p>{{ site.description }}</p>
+</div>
+
+<!-- 通栏视差视频 -->
+<div class="parallax-wrap">
 <video class="bg-video" autoplay muted loop playsinline preload="auto">
-  <source src="{{ site.baseurl }}/assets/jeep-field-blue2.mp4" type="video/mp4">
+  <source src="{{ site.baseurl }}/assets/jeep-field-blue.mp4" type="video/mp4">
 </video>
 
 <div class="carousel-time-text">
@@ -182,42 +211,9 @@ height:220px;
 <span data-index="2"></span>
 </div>
 </div>
-<script>
-// ===== 主时间更新 =====
-function updateCarouselTime(){
-const now = new Date();
-const weekday = now.toLocaleDateString('en-US',{weekday:'long'});
-const hours = String(now.getHours()).padStart(2,'0');
-const mins = String(now.getMinutes()).padStart(2,'0');
-document.getElementById('carouselTime').innerText = `${weekday} ${hours}:${mins}`;
-}
-updateCarouselTime();
-setInterval(updateCarouselTime,1000);
 
-// ===== 打字机 LIFE IS SHORT，页面载入只执行一次，无音效 =====
-const targetStr = "LIFE IS SHORT";
-const el = document.getElementById('typeText');
-let idx = 0;
-function typeWriter(){
-if(idx < targetStr.length){
-el.textContent = targetStr.substring(0, idx+1);
-idx++;
-setTimeout(typeWriter,120);
-}
-}
-typeWriter();
-
-// ===== 圆点点击逻辑 =====
-const wrap = document.querySelector('.home-carousel-wrap');
-const dots = wrap.querySelectorAll('.carousel-dots span');
-dots.forEach((dot, idx) => {
-dot.addEventListener('click', () => {
-dots.forEach(d => d.classList.remove('active'));
-dot.classList.add('active');
-});
-})
-</script>
-
+<!-- 文章内容，保持原有1100px容器宽度 -->
+<div class="container">
 <div class="posts-timeline">
     {% assign postsByYear = site.posts | group_by_exp: "post", "post.date | date: '%Y'" %}
     {% for year in postsByYear %}
@@ -249,3 +245,52 @@ dot.classList.add('active');
     {% endfor %}
 </div>
 </div>
+
+<script>
+// ===== 主时间更新 =====
+function updateCarouselTime(){
+const now = new Date();
+const weekday = now.toLocaleDateString('en-US',{weekday:'long'});
+const hours = String(now.getHours()).padStart(2,'0');
+const mins = String(now.getMinutes()).padStart(2,'0');
+document.getElementById('carouselTime').innerText = `${weekday} ${hours}:${mins}`;
+}
+updateCarouselTime();
+setInterval(updateCarouselTime,1000);
+
+// ===== 打字机 LIFE IS SHORT，页面载入只执行一次，无音效 =====
+const targetStr = "LIFE IS SHORT";
+const el = document.getElementById('typeText');
+let idx = 0;
+function typeWriter(){
+if(idx < targetStr.length){
+el.textContent = targetStr.substring(0, idx+1);
+idx++;
+setTimeout(typeWriter,120);
+}
+}
+typeWriter();
+
+// ===== 视差滚动逻辑 =====
+const videoBg = document.querySelector('.bg-video');
+const parallaxWrap = document.querySelector('.parallax-wrap');
+function parallaxEffect(){
+  const rect = parallaxWrap.getBoundingClientRect();
+  const scrollPercent = -rect.top / window.innerHeight;
+  const moveY = scrollPercent * 60; // 数字越大，视差拉动越强
+  videoBg.style.transform = `translateY(${moveY}px)`;
+}
+window.addEventListener('scroll',parallaxEffect);
+window.addEventListener('resize',parallaxEffect);
+parallaxEffect();
+
+// ===== 圆点点击逻辑 =====
+const wrap = document.querySelector('.parallax-wrap');
+const dots = wrap.querySelectorAll('.carousel-dots span');
+dots.forEach((dot, idx) => {
+dot.addEventListener('click', () => {
+dots.forEach(d => d.classList.remove('active'));
+dot.classList.add('active');
+});
+})
+</script>
