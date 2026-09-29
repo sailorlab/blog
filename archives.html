@@ -70,6 +70,21 @@ display:block;
 color:#000;
 text-decoration:none;
 }
+.loadmore-wrap{
+text-align:center;
+margin:50px 0;
+}
+#loadMoreBtn {
+padding:10px 24px;
+border:1px solid #ddd;
+background:#fff;
+cursor:pointer;
+border-radius:2px;
+transition:0.2s;
+}
+#loadMoreBtn:hover{
+background:#f7f7f7;
+}
 /* 移动端自动单列 */
 @media (max-width:768px) {
 .post-list {
@@ -96,11 +111,16 @@ padding-left:0;
 <h1>文章归档</h1>
 <p>全部文章归档列表</p>
 </div>
-
-<div class="post-list">
-{% for post in site.posts %}
+<div class="post-list" id="postContainer">
+{% assign allPosts = site.posts %}
+{% assign initialCount = 6 %}
+{% for post in allPosts limit:initialCount %}
 <div class="post-card">
+  {% if post.thumbnail %}
 <img class="post-card-thumb" src="{{ site.baseurl }}{{ post.thumbnail }}" alt="{{ post.title }}">
+  {% else %}
+<div class="post-card-thumb" style="background:#f5f5f5;"></div>
+  {% endif %}
 <div class="post-card-text">
 <div class="post-card-date">{{ post.date | date: "%Y-%m-%d" }}</div>
 <a class="post-card-title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
@@ -115,4 +135,55 @@ padding-left:0;
 </div>
 {% endfor %}
 </div>
+
+{% if allPosts.size > initialCount %}
+<div class="loadmore-wrap">
+<button id="loadMoreBtn">加载更多文章</button>
 </div>
+{% endif %}
+</div>
+
+<script>
+const archivePosts = [
+{% for p in site.posts %}
+{
+title: "{{p.title | escape}}",
+url: "{{p.url}}",
+thumbnail: "{{p.thumbnail}}",
+date: "{{p.date | date: '%Y-%m-%d'}}",
+tags: [{% for t in p.tags %}"{{t}}",{% endfor %}]
+},
+{% endfor %}
+];
+let showCount = 6;
+const addNum = 6;
+const container = document.getElementById('postContainer');
+const btn = document.getElementById('loadMoreBtn');
+
+btn.addEventListener('click',()=>{
+  showCount += addNum;
+  container.innerHTML = '';
+  for(let i=0; i<showCount; i++){
+    if(!archivePosts[i]) break;
+    const p = archivePosts[i];
+    let thumbHtml = p.thumbnail ? `<img class="post-card-thumb" src="{{site.baseurl}}${p.thumbnail}" alt="${p.title}">` : `<div class="post-card-thumb" style="background:#f5f5f5;"></div>`;
+    let tagHtml = '';
+    if(p.tags.length>0){
+      tagHtml = `<div style="margin-top:8px;font-size:12px;color:#888;">${p.tags.map(t=>`#${t}`).join(' ')}</div>`;
+    }
+    container.innerHTML += `
+      <div class="post-card">
+        ${thumbHtml}
+        <div class="post-card-text">
+          <div class="post-card-date">${p.date}</div>
+          <a class="post-card-title" href="{{site.baseurl}}${p.url}">${p.title}</a>
+          ${tagHtml}
+        </div>
+      </div>
+    `;
+  }
+  if(showCount >= archivePosts.length){
+    btn.style.display = 'none';
+  }
+})
+</script>

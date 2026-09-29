@@ -97,6 +97,21 @@ color:#888;
 .post-card-tags span {
 margin-left:6px;
 }
+.loadmore-wrap{
+text-align:center;
+margin:50px 0;
+}
+#loadMoreBtn {
+padding:10px 24px;
+border:1px solid #ddd;
+background:#fff;
+cursor:pointer;
+border-radius:2px;
+transition:0.2s;
+}
+#loadMoreBtn:hover{
+background:#f7f7f7;
+}
 /* 移动端：网格变成单列 */
 @media (max-width:768px) {
 #tag-post-list {
@@ -131,7 +146,9 @@ padding-left:0;
 <span class="tag-item" onclick="showTag('all')">全部文章</span>
 </div>
 <div class="posts-timeline" id="tag-post-list">
-{% for post in site.posts %}
+{% assign allPosts = site.posts %}
+{% assign initialCount = 6 %}
+{% for post in allPosts limit:initialCount %}
 <div class="post-card" data-tags="{{ post.tags | join:',' }}">
   {% if post.thumbnail %}
 <img class="post-card-thumb" src="{{ site.baseurl }}{{ post.thumbnail }}" alt="{{ post.title }}">
@@ -154,21 +171,85 @@ padding-left:0;
 </div>
 {% endfor %}
 </div>
+
+{% if allPosts.size > initialCount %}
+<div class="loadmore-wrap">
+<button id="loadMoreBtn">加载更多文章</button>
 </div>
+{% endif %}
+</div>
+
 <script>
-function showTag(targetTag){
-const allCards = document.querySelectorAll('.post-card');
-allCards.forEach(card=>{
-if(targetTag === 'all'){
-card.style.display = 'flex';
-    }else{
-const tags = card.dataset.tags.split(',');
-if(tags.includes(targetTag)){
-card.style.display = 'flex';
-      }else{
-card.style.display = 'none';
-      }
+// 存储全部文章数据
+const tagAllPosts = [
+{% for p in site.posts %}
+{
+title: "{{p.title | escape}}",
+url: "{{p.url}}",
+thumbnail: "{{p.thumbnail}}",
+date: "{{p.date | date: '%m-%d'}}",
+tags: [{% for t in p.tags %}"{{t}}",{% endfor %}]
+},
+{% endfor %}
+];
+let showCount = 6;
+const addNum = 6;
+const container = document.getElementById('tag-post-list');
+const btn = document.getElementById('loadMoreBtn');
+let currentFilterTag = "all";
+
+// 渲染文章列表
+function renderList(){
+  container.innerHTML = '';
+  let renderPosts = [];
+  // 筛选标签
+  if(currentFilterTag === 'all'){
+    renderPosts = tagAllPosts.slice(0, showCount);
+  }else{
+    const filtered = tagAllPosts.filter(item => item.tags.includes(currentFilterTag));
+    renderPosts = filtered.slice(0, showCount);
+  }
+
+  renderPosts.forEach(p=>{
+    let thumbHtml = p.thumbnail ? `<img class="post-card-thumb" src="{{site.baseurl}}${p.thumbnail}" alt="${p.title}">` : `<div class="post-card-thumb" style="background:#f5f5f5;"></div>`;
+    let tagHtml = '';
+    if(p.tags.length>0){
+      tagHtml = `<div class="post-card-tags">${p.tags.map(t=>`<span>#${t}</span>`).join(' ')}</div>`;
     }
+    container.innerHTML += `
+      <div class="post-card" data-tags="${p.tags.join(',')}">
+        ${thumbHtml}
+        <div class="post-card-text">
+          <div class="post-card-date">${p.date}</div>
+          <div class="post-card-title"><a href="{{site.baseurl}}${p.url}">${p.title}</a></div>
+          ${tagHtml}
+        </div>
+      </div>
+    `;
   })
+
+  // 判断是否还有更多
+  let sourceList = currentFilterTag === 'all' ? tagAllPosts : tagAllPosts.filter(item => item.tags.includes(currentFilterTag));
+  if(showCount >= sourceList.length){
+    btn.style.display = 'none';
+  }else{
+    btn.style.display = 'block';
+  }
 }
+
+// 标签切换函数，同步重置加载数量
+function showTag(targetTag){
+  currentFilterTag = targetTag;
+  showCount = 6;
+  renderList();
+}
+
+// 加载更多点击
+btn.addEventListener('click',()=>{
+  showCount += addNum;
+  renderList();
+})
+
+// 初始渲染
+renderList();
 </script>
