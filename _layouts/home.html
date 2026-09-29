@@ -103,7 +103,6 @@ border-radius:12px;
 margin:40px 0 60px;
 height:380px;
 }
-/* 替换为视频样式，铺满容器 */
 .bg-video {
 width:100%;
 height:100%;
@@ -130,7 +129,6 @@ transition: 0.3s;
 .carousel-dots span.active {
 background:#fff;
 }
-/* 时间外层容器：高度占视频80%，底部20%留给小圆点 */
 .carousel-time-text {
 position: absolute;
 top: 0;
@@ -145,7 +143,6 @@ gap:12px;
 z-index: 10;
 pointer-events:none;
 }
-/* 主时间文字，强制单行，自动缩小 */
 .carousel-time-text .time-main {
 color:#ffffff;
 font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -156,7 +153,6 @@ text-shadow: none;
 font-size: clamp(16px, 12vw, 80px);
 line-height:1;
 }
-/* 打字机副标题 LIFE IS SHORT */
 .carousel-time-text .type-sub {
 color:#ffffff;
 font-family: 'Courier New', Courier, monospace;
@@ -171,9 +167,8 @@ height:220px;
 }
 </style>
 <div class="home-carousel-wrap">
-<!-- 15s Jeep田野蓝调视频，替换src为你的视频地址 -->
-<video class="bg-video" autoplay muted loop playsinline>
-  <source src="/assets/jeep-field-blue.mp4" type="video/mp4">
+<video class="bg-video" autoplay muted loop playsinline preload="auto">
+  <source src="{{ site.baseurl }}/assets/jeep-field-blue2.mp4" type="video/mp4">
 </video>
 
 <div class="carousel-time-text">
@@ -209,11 +204,10 @@ el.textContent = targetStr.substring(0, idx+1);
 idx++;
 setTimeout(typeWriter,120);
 }
-// 打完停止，不再循环
 }
 typeWriter();
 
-// ===== 保留圆点点击逻辑（可以用来切换视频/素材，当前单视频，你后续扩展可用） =====
+// ===== 圆点点击逻辑 =====
 const wrap = document.querySelector('.home-carousel-wrap');
 const dots = wrap.querySelectorAll('.carousel-dots span');
 dots.forEach((dot, idx) => {
