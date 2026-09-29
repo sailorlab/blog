@@ -105,7 +105,6 @@ margin-left:0;
   }
 }
 </style>
-<!-- 通栏视差模块 -->
 <style>
 .parallax-wrap{
 width:100vw;
@@ -170,10 +169,15 @@ gap:12px;
 z-index: 10;
 pointer-events:none;
 }
-/* 粒子画布，继承原有文字样式 */
-#particleTimeCanvas{
-display:block;
-position:relative;
+.carousel-time-text .time-main {
+color:#ffffff;
+font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+font-weight:500;
+letter-spacing:1px;
+white-space: nowrap;
+text-shadow: none;
+font-size: clamp(16px, 12vw, 80px);
+line-height:1;
 }
 .carousel-time-text .type-sub {
 color:#ffffff;
@@ -181,6 +185,16 @@ font-family: 'Courier New', Courier, monospace;
 font-size:20px;
 white-space:nowrap;
 text-shadow: none;
+}
+/* 粒子画布，叠加在文字上方，同位置 */
+#particleOverlayCanvas{
+position: absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+z-index:11;
+pointer-events:none;
 }
 @media(max-width:768px){
 .parallax-wrap{
@@ -203,9 +217,11 @@ height:calc(100% + 150px);
 <source src="{{ site.baseurl }}/assets/jeep-field-blue.mp4" type="video/mp4">
 </video>
 <div class="carousel-time-text">
-<!-- 替换原来的time-main div为Canvas粒子画布 -->
-<canvas id="particleTimeCanvas"></canvas>
-<div class="type-sub" id="typeText"></div>
+    <!-- 粒子叠加画布 -->
+    <canvas id="particleOverlayCanvas"></canvas>
+    <!-- 原生文字保留，字体完全不变 -->
+    <div class="time-main" id="carouselTime"></div>
+    <div class="type-sub" id="typeText"></div>
 </div>
 <div class="carousel-dots">
 <span data-index="0" class="active"></span>
@@ -246,37 +262,30 @@ height:calc(100% + 150px);
 </div>
 </div>
 <script>
-// ========= 粒子文字引擎：分钟变更 → 消散、重组 =========
-const canvas = document.getElementById('particleTimeCanvas');
+const canvas = document.getElementById('particleOverlayCanvas');
 const ctx = canvas.getContext('2d');
 let particles = [];
-let currentText = "";
 let isAnimating = false;
-
-// 和你原来 .time-main 字体保持完全一致
-const fontCSS = `500 clamp(16px,12vw,80px) "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
 const particleColor = "#ffffff";
 const particleRadius = 2.2;
-const pixelStep = 6; //粒子密度，越小越细腻
+const pixelStep = 6;
 
-// 画布自适应大小
+// 画布尺寸自适应
 function resizeCanvas(){
   const wrap = document.querySelector('.carousel-time-text');
-  const w = wrap.clientWidth * 0.92;
-  const h = wrap.clientHeight * 0.6;
-  canvas.width = w;
-  canvas.height = h;
+  canvas.width = wrap.clientWidth;
+  canvas.height = wrap.clientHeight;
 }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// 提取文字像素点位，生成粒子目标位置
-function getTextParticlePoints(text){
+// 获取文字轮廓粒子点位（复用time-main的字体样式）
+function getTextPoints(text){
   const offCanvas = document.createElement('canvas');
   const offCtx = offCanvas.getContext('2d');
   offCanvas.width = canvas.width;
   offCanvas.height = canvas.height;
-  offCtx.font = fontCSS;
+  offCtx.font = `500 clamp(16px,12vw,80px) "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
   offCtx.fillStyle="#fff";
   offCtx.textAlign="center";
   offCtx.textBaseline="middle";
@@ -303,14 +312,12 @@ class Particle {
     this.vx = 0;
     this.vy = 0;
   }
-  // 粒子向外消散
   scatterOut(){
     const angle = Math.random() * Math.PI * 2;
     const speed = 2 + Math.random()*4;
     this.vx = Math.cos(angle)*speed;
     this.vy = Math.sin(angle)*speed;
   }
-  // 粒子汇聚到目标文字位置
   assembleToTarget(){
     this.vx = (this.originX - this.x) * 0.08;
     this.vy = (this.originY - this.y) * 0.08;
@@ -329,35 +336,39 @@ class Particle {
   }
 }
 
-// 文字切换动画时序：消散 → 短暂空白 → 粒子汇聚
-async function switchTimeText(newText){
+// 粒子动画：消散 -> 停顿 -> 汇聚
+async function runParticleEffect(oldText, newText){
   if(isAnimating) return;
   isAnimating = true;
-  // 旧文字粒子散开
-  particles.forEach(p => p.scatterOut());
+  particles = [];
+  // 旧文字粒子生成，向外飘散
+  const oldPoints = getTextPoints(oldText);
+  oldPoints.forEach(pt => {
+    const p = new Particle(pt.x, pt.y);
+    particles.push(p);
+  });
+  particles.forEach(p=>p.scatterOut());
   await sleep(400);
   particles = [];
-  currentText = newText;
-  // 获取新文字粒子坐标
-  const targetPoints = getTextParticlePoints(newText);
-  for(let pt of targetPoints){
+  await sleep(200);
+  // 新文字粒子，从四周飞入汇聚
+  const newPoints = getTextPoints(newText);
+  newPoints.forEach(pt => {
     const p = new Particle(pt.x, pt.y);
-    // 粒子从四周远处飞入
     p.x = canvas.width/2 + (Math.random()-0.5)*400;
     p.y = canvas.height/2 + (Math.random()-0.5)*400;
     particles.push(p);
-  }
-  await sleep(200);
-  // 开始汇聚成新文字
-  particles.forEach(p => p.assembleToTarget());
+  });
+  particles.forEach(p=>p.assembleToTarget());
   await sleep(400);
+  particles = [];
   isAnimating = false;
 }
 function sleep(ms){
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// 全局渲染循环
+// 渲染循环
 function renderLoop(){
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   particles.forEach(p=>{
@@ -368,7 +379,11 @@ function renderLoop(){
 }
 renderLoop();
 
-// 获取星期+时间字符串
+// ===== 主时间更新（原生DOM文字保留） =====
+let lastTimeText = "";
+let lastMinute = new Date().getMinutes();
+const timeDom = document.getElementById('carouselTime');
+
 function getTimeStr(){
   const now = new Date();
   const weekday = now.toLocaleDateString('en-US',{weekday:'long'});
@@ -376,27 +391,27 @@ function getTimeStr(){
   const mm = String(now.getMinutes()).padStart(2, '0');
   return `${weekday} ${hh}:${mm}`;
 }
+// 初始化
+lastTimeText = getTimeStr();
+timeDom.innerText = lastTimeText;
 
-// 初始化页面加载时直接渲染当前时间
-currentText = getTimeStr();
-const initPoints = getTextParticlePoints(currentText);
-initPoints.forEach(pt=> particles.push(new Particle(pt.x, pt.y)));
-
-// 每分钟检测，分钟变化就播放粒子动画
-let lastMinute = new Date().getMinutes();
 function checkTimeUpdate(){
   const now = new Date();
   const thisMin = now.getMinutes();
   const newStr = getTimeStr();
   if(thisMin !== lastMinute){
     lastMinute = thisMin;
-    switchTimeText(newStr);
+    // 先播放粒子消散重组特效，再更新DOM文字
+    runParticleEffect(lastTimeText, newStr).then(()=>{
+      timeDom.innerText = newStr;
+      lastTimeText = newStr;
+    });
   }
 }
 checkTimeUpdate();
-setInterval(checkTimeUpdate, 1000);
+setInterval(checkTimeUpdate,1000);
 
-// ===== 打字机 LIFE IS SHORT（保留原样）=====
+// ===== 打字机 LIFE IS SHORT =====
 const targetStr = "LIFE IS SHORT";
 const el = document.getElementById('typeText');
 let idx = 0;
@@ -409,7 +424,7 @@ setTimeout(typeWriter,120);
 }
 typeWriter();
 
-// ===== 图片视差（原样保留）=====
+// ===== 图片视差 =====
 const bgImg = document.querySelector('.parallax-bg-img');
 const parallaxWrap = document.querySelector('.parallax-wrap');
 const parallaxStrength = 0.3;
@@ -428,7 +443,7 @@ parallaxLoop();
 window.addEventListener('scroll', updateParallax, { passive:true });
 window.addEventListener('resize', updateParallax);
 
-// ===== 圆点点击逻辑（原样保留）=====
+// ===== 圆点点击逻辑 =====
 const wrap = document.querySelector('.parallax-wrap');
 const dots = wrap.querySelectorAll('.carousel-dots span');
 dots.forEach((dot, idx) => {
