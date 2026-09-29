@@ -83,6 +83,19 @@ max-width:1100px;
 margin:0px auto;
 padding:0 20px;
 }
+/* 标题打字机下划线光标 */
+.heading-underline-cursor {
+  display: inline-block;
+  width: 10px;
+  border-bottom: 3px solid #222;
+  animation: underlineBlink 0.8s infinite;
+  margin-left:4px;
+}
+@keyframes underlineBlink {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+  100% { opacity: 1; }
+}
 .loadmore-wrap{
 text-align:center;
 margin:50px 0;
@@ -212,7 +225,7 @@ height:calc(100% + 150px);
 }
 </style>
 <div class="home-intro">
-<h1>{{ site.title }}</h1>
+<h1><span id="headingTypeText"></span><span class="heading-underline-cursor"></span></h1>
 <p>{{ site.description }}</p>
 </div>
 <div class="parallax-wrap">
@@ -268,28 +281,24 @@ height:calc(100% + 150px);
 </div>
 {% endfor %}
 </div>
-
 {% if allPosts.size > initialCount %}
 <div class="loadmore-wrap">
 <button id="loadMoreBtn">加载更多文章</button>
 </div>
 {% endif %}
 </div>
-
 <script>
 const timeDom = document.getElementById('carouselTime');
-
 function updateTime(){
-    const now = new Date();
-    const weekday = now.toLocaleDateString('en-US',{weekday:'long'});
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
-    timeDom.innerText = `${weekday} ${hh}:${mm}`;
+const now = new Date();
+const weekday = now.toLocaleDateString('en-US',{weekday:'long'});
+const hh = String(now.getHours()).padStart(2, '0');
+const mm = String(now.getMinutes()).padStart(2, '0');
+timeDom.innerText = `${weekday} ${hh}:${mm}`;
 }
 updateTime();
 setInterval(updateTime,1000);
-
-// ===== 打字机 LIFE IS SHORT =====
+// =====【保留原轮播打字机 LIFE IS SHORT】=====
 const targetStr = "LIFE IS SHORT";
 const el = document.getElementById('typeText');
 let idx = 0;
@@ -301,6 +310,26 @@ setTimeout(typeWriter,120);
 }
 }
 typeWriter();
+
+// ===== home-intro h1 标题打字机：破晓 PO.XIAO =====
+const headingText = "破晓 PO.XIAO";
+const headingEl = document.getElementById('headingTypeText');
+let headingIndex = 0;
+function headingTypeWriter(){
+  if(headingIndex < headingText.length){
+    headingEl.textContent = headingText.substring(0, headingIndex + 1);
+    headingIndex++;
+    setTimeout(headingTypeWriter, 200); // 200ms每字，慢速
+  }else{
+    // 打完停留5秒，清空重新循环
+    setTimeout(()=>{
+      headingEl.textContent = "";
+      headingIndex = 0;
+      headingTypeWriter();
+    },5000);
+  }
+}
+headingTypeWriter();
 
 // ===== 图片视差 =====
 const bgImg = document.querySelector('.parallax-bg-img');
@@ -320,7 +349,6 @@ requestAnimationFrame(parallaxLoop);
 parallaxLoop();
 window.addEventListener('scroll', updateParallax, { passive:true });
 window.addEventListener('resize', updateParallax);
-
 // ===== 圆点点击逻辑 =====
 const wrap = document.querySelector('.parallax-wrap');
 const dots = wrap.querySelectorAll('.carousel-dots span');
@@ -330,7 +358,6 @@ dots.forEach(d => d.classList.remove('active'));
 dots[idx].classList.add('active');
 });
 })
-
 // ========= 加载更多文章 JS =========
 const allPosts = [
 {% for p in site.posts %}
@@ -348,38 +375,37 @@ let showCount = 6;
 const addNum = 6;
 const container = document.getElementById('postContainer');
 const btn = document.getElementById('loadMoreBtn');
-
 btn.addEventListener('click',()=>{
-  showCount += addNum;
-  container.innerHTML = '';
-  let lastYear = '';
-  for(let i=0; i<showCount; i++){
-    if(!allPosts[i]) break;
-    const p = allPosts[i];
-    if(lastYear !== p.year){
-      if(lastYear) container.innerHTML += `</div>`;
-      container.innerHTML += `<div class="timeline-year-group"><h2 class="timeline-year">${p.year}</h2>`;
-      lastYear = p.year;
+showCount += addNum;
+container.innerHTML = '';
+let lastYear = '';
+for(let i=0; i<showCount; i++){
+if(!allPosts[i]) break;
+const p = allPosts[i];
+if(lastYear !== p.year){
+if(lastYear) container.innerHTML += `</div>`;
+container.innerHTML += `<div class="timeline-year-group"><h2 class="timeline-year">${p.year}</h2>`;
+lastYear = p.year;
     }
-    let thumbHtml = p.thumbnail ? `<img class="post-card-thumb" src="{{site.baseurl}}${p.thumbnail}" alt="${p.title}">` : `<div class="post-card-thumb" style="background:#f5f5f5;"></div>`;
-    let tagHtml = '';
-    if(p.tags.length>0){
-      tagHtml = `<div class="post-card-tags">${p.tags.map(t=>`<span>#${t}</span>`).join(' ')}</div>`;
+let thumbHtml = p.thumbnail ? `<img class="post-card-thumb" src="{{site.baseurl}}${p.thumbnail}" alt="${p.title}">` : `<div class="post-card-thumb" style="background:#f5f5f5;"></div>`;
+let tagHtml = '';
+if(p.tags.length>0){
+tagHtml = `<div class="post-card-tags">${p.tags.map(t=>`<span>#${t}</span>`).join(' ')}</div>`;
     }
-    container.innerHTML += `
+container.innerHTML += `
       <div class="post-card">
-        ${thumbHtml}
+${thumbHtml}
         <div class="post-card-text">
           <div class="post-card-date">${p.date}</div>
           <div class="post-card-title"><a href="{{site.baseurl}}${p.url}">${p.title}</a></div>
-          ${tagHtml}
+${tagHtml}
         </div>
       </div>
     `;
   }
-  if(lastYear) container.innerHTML += `</div>`;
-  if(showCount >= allPosts.length){
-    btn.style.display = 'none';
+if(lastYear) container.innerHTML += `</div>`;
+if(showCount >= allPosts.length){
+btn.style.display = 'none';
   }
 })
 </script>
