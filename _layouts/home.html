@@ -136,27 +136,35 @@ transition: 0.3s;
 .carousel-dots span.active {
 background:#fff;
 }
+/* 时间外层容器：高度占图片80%，底部20%留给小圆点 */
 .carousel-time-text {
-position:absolute;
-top:50%;
-left:50%;
-transform: translate(-50%, -50%);
-font-size:90px;
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 80%;
+display: flex;
+align-items: center;
+justify-content: center;
+z-index: 10;
+pointer-events:none;
+}
+/* 文字强制单行，使用font-size-adjust自动缩放到适合宽度 */
+.carousel-time-text span {
 color:#ffffff;
 font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 font-weight:500;
 letter-spacing:1px;
-z-index: 10;
-pointer-events:none;
+white-space: nowrap; /* 强制一行，禁止换行 */
 text-shadow: none;
+/* 核心：自动缩放，容器宽度不够自动缩小字体 */
+font-size: clamp(16px, 12vw, 80px);
+line-height:1;
 }
 @media(max-width:768px){
 .carousel-item img {
 height:220px;
   }
-.carousel-time-text {
-font-size:24px;
-}
 }
 </style>
 <div class="home-carousel-wrap">
@@ -175,7 +183,9 @@ font-size:24px;
 </div>
 </div>
 
-<div class="carousel-time-text" id="carouselTime"></div>
+<div class="carousel-time-text">
+<span id="carouselTime"></span>
+</div>
 
 <div class="carousel-dots">
 <span data-index="0" class="active"></span>
