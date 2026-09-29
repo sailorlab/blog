@@ -266,13 +266,17 @@ const ctx = canvas.getContext('2d');
 let particles = [];
 let isAnimating = false;
 
-// 烟雾粒子参数
-const particleRadius = 3.2;
-const pixelStep = 7;
-const windPower = 1.2; //风力大小，往右吹
-const fadeSpeed = 0.012;
+// 烟雾物理参数
+const particleRadius = 3;        // 基础粒子大小
+const pixelStep = 7;              // 采样密度，越小烟雾越细腻
+const baseWind = 0.35;            // 基础向右风力
+const gustStrength = 0.55;        // 阵风强度
+const turbulence = 0.35;          // 横向/纵向随机扰动，更真实烟雾
+const driftSpread = 0.25;         // 粒子云边缘扩散
+const fadeSpeed = 0.007;          // 淡出速度
+const particleLife = 90;          // 粒子存活帧数
+const cloudCoherence = 0.82;      // 烟雾团簇保持程度，越高越像一团烟
 
-// 画布自适应
 function resizeCanvas(){
   const wrap = document.querySelector('.carousel-time-text');
   canvas.width = wrap.clientWidth;
@@ -281,7 +285,6 @@ function resizeCanvas(){
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// 提取文字轮廓点位，和time-main字体保持一致
 function getTextPoints(text){
   const offCanvas = document.createElement('canvas');
   const offCtx = offCanvas.getContext('2d');
@@ -296,9 +299,9 @@ function getTextPoints(text){
   const points = [];
   for(let y=0; y < offCanvas.height; y += pixelStep){
     for(let x=0; x < offCanvas.width; x += pixelStep){
-      const i = (y * offCanvas.width + x) *4;
+      const i = (y * offCanvas.width + x) * 4;
       if(imgData.data[i+3] > 128){
-        points.push({x,y});
+        points.push({x, y});
       }
     }
   }
@@ -306,84 +309,134 @@ function getTextPoints(text){
 }
 
 class SmokeParticle {
-  constructor(targetX, targetY){
-    this.x = targetX;
-    this.y = targetY;
-    this.originX = targetX;
-    this.originY = targetY;
+  constructor(x, y){
+    this.x = x;
+    this.y = y;
+    this.originX = x;
+    this.originY = y;
     this.vx = 0;
     this.vy = 0;
-    this.alpha = 1;
+    this.life = 0;
+    this.maxLife = particleLife + Math.random() * 40;
+    this.alpha = 0.9 + Math.random() * 0.1;
+    this.size = particleRadius + Math.random() * 1.2;
+    this.phase = Math.random() * Math.PI * 2;
+    this.mode = "idle";
   }
-  // 风吹消散：向右飘动 + 透明度衰减
+
+  // 被风吹散：整体右移 + 湍流 + 扩散
   windAway(){
-    this.vx = windPower + Math.random() * 1.0;
-    this.vy = (Math.random()-0.5)*0.6;
+    this.mode = "scatter";
+    this.vx = baseWind + Math.random() * gustStrength;
+    this.vy = (Math.random() - 0.5) * 0.4;
   }
-  // 烟雾汇聚：粒子从右侧飘回文字位置
+
+  // 从烟雾中重组：先被风带偏，再缓慢回到文字位置
   windGather(){
-    this.vx = (this.originX - this.x) * 0.045;
-    this.vy = (this.originY - this.y) * 0.045;
+    this.mode = "gather";
+    this.vx = baseWind * 0.4 + (this.originX - this.x) * 0.035;
+    this.vy = (this.originY - this.y) * 0.035 + (Math.random() - 0.5) * 0.2;
   }
+
   update(){
+    this.life++;
+    const t = this.life / this.maxLife;
+
+    // 真实烟雾：低频大尺度涡流 + 高频小扰动
+    const time = performance.now() * 0.001;
+    const swirlX = Math.sin(time * 1.2 + this.phase) * turbulence * 0.15;
+    const swirlY = Math.cos(time * 0.9 + this.phase) * turbulence * 0.12;
+    const microNoise = (Math.random() - 0.5) * turbulence * 0.25;
+
+    if(this.mode === "scatter"){
+      // 边缘粒子扩散更快，中心粒子更有团簇感
+      const spreadFactor = Math.pow(t, 1.3);
+      this.vx += (swirlX + microNoise) * 0.08;
+      this.vy += swirlY * 0.06;
+      this.vx += driftSpread * spreadFactor * Math.random() * 0.1;
+      this.vy += driftSpread * spreadFactor * (Math.random() - 0.5) * 0.15;
+
+      // 烟雾团簇保持：靠近中心的粒子速度更一致
+      if(Math.random() < cloudCoherence){
+        this.vx += baseWind * 0.02;
+      }
+    }
+
+    if(this.mode === "gather"){
+      this.vx += swirlX * 0.04;
+      this.vy += swirlY * 0.03;
+      this.vx += microNoise * 0.04;
+    }
+
+    // 空气阻力，让运动更自然
+    this.vx *= 0.982;
+    this.vy *= 0.96;
+
     this.x += this.vx;
     this.y += this.vy;
-    this.alpha -= fadeSpeed;
-    this.vx *= 0.98;
-    this.vy *= 0.98;
+
+    // 生命周期透明度：先稳定，后快速消散
+    if(t < 0.45){
+      this.alpha = 0.95 - t * 0.3;
+    } else {
+      this.alpha = Math.max(0, 0.82 - Math.pow(t, 2.1) * 1.1);
+    }
+
+    // 飘散过程中尺寸略微变大，像烟雾膨胀
+    this.size = particleRadius + Math.random() * 0.8 + t * 1.4;
   }
+
   draw(){
     ctx.beginPath();
-    ctx.arc(this.x, this.y, particleRadius, 0, Math.PI*2);
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
     ctx.fillStyle = `rgba(255,255,255,${this.alpha})`;
     ctx.fill();
   }
 }
 
-// 完整烟雾动画流程：旧文字被风吹散 → 短暂停顿 → 新文字烟雾汇聚浮现
 async function runSmokeEffect(oldText, newText){
   if(isAnimating) return;
   isAnimating = true;
   particles = [];
 
-  // 1. 旧文字粒子生成，风吹向右消散
+  // 1. 旧文字变成烟雾，被风吹散
   const oldPoints = getTextPoints(oldText);
   oldPoints.forEach(pt => {
     const p = new SmokeParticle(pt.x, pt.y);
     particles.push(p);
   });
   particles.forEach(p => p.windAway());
-  await sleep(650);
+  await sleep(720);
 
   particles = [];
-  await sleep(180);
+  await sleep(160);
 
-  // 2. 新文字粒子从右侧远处出发，随风飘回汇聚
+  // 2. 新文字从右侧烟雾中逐渐聚出
   const newPoints = getTextPoints(newText);
   newPoints.forEach(pt => {
     const p = new SmokeParticle(pt.x, pt.y);
-    p.x = canvas.width * 0.65 + Math.random() * canvas.width * 0.35;
-    p.y = pt.y + (Math.random()-0.5)*30;
+    p.x = canvas.width * 0.62 + Math.random() * canvas.width * 0.38;
+    p.y = pt.y + (Math.random() - 0.5) * 40;
     p.alpha = 0;
     particles.push(p);
   });
   particles.forEach(p => p.windGather());
-  await sleep(700);
+  await sleep(760);
 
   particles = [];
   isAnimating = false;
 }
+
 function sleep(ms){
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// 全局渲染循环
 function renderLoop(){
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  particles.forEach(p=>{
+  particles.forEach(p => {
     p.update();
     p.draw();
-  })
+  });
   requestAnimationFrame(renderLoop);
 }
 renderLoop();
@@ -409,25 +462,25 @@ function checkTimeUpdate(){
   const newStr = getTimeStr();
   if(thisMin !== lastMinute){
     lastMinute = thisMin;
-    runSmokeEffect(lastTimeText, newStr).then(()=>{
+    runSmokeEffect(lastTimeText, newStr).then(() => {
       timeDom.innerText = newStr;
       lastTimeText = newStr;
     });
   }
 }
 checkTimeUpdate();
-setInterval(checkTimeUpdate,1000);
+setInterval(checkTimeUpdate, 1000);
 
 // ===== 打字机 LIFE IS SHORT =====
 const targetStr = "LIFE IS SHORT";
 const el = document.getElementById('typeText');
 let idx = 0;
 function typeWriter(){
-if(idx < targetStr.length){
-el.textContent = targetStr.substring(0, idx+1);
-idx++;
-setTimeout(typeWriter,120);
-}
+  if(idx < targetStr.length){
+    el.textContent = targetStr.substring(0, idx+1);
+    idx++;
+    setTimeout(typeWriter, 120);
+  }
 }
 typeWriter();
 
@@ -437,14 +490,14 @@ const parallaxWrap = document.querySelector('.parallax-wrap');
 const parallaxStrength = 0.3;
 const maxMove = 60;
 function updateParallax(){
-const rect = parallaxWrap.getBoundingClientRect();
-let moveY = rect.top * parallaxStrength;
-moveY = Math.max(-maxMove, Math.min(moveY, maxMove));
-bgImg.style.transform = `translateY(${moveY}px) translateZ(0)`;
+  const rect = parallaxWrap.getBoundingClientRect();
+  let moveY = rect.top * parallaxStrength;
+  moveY = Math.max(-maxMove, Math.min(moveY, maxMove));
+  bgImg.style.transform = `translateY(${moveY}px) translateZ(0)`;
 }
 function parallaxLoop(){
-updateParallax();
-requestAnimationFrame(parallaxLoop);
+  updateParallax();
+  requestAnimationFrame(parallaxLoop);
 }
 parallaxLoop();
 window.addEventListener('scroll', updateParallax, { passive:true });
@@ -454,9 +507,10 @@ window.addEventListener('resize', updateParallax);
 const wrap = document.querySelector('.parallax-wrap');
 const dots = wrap.querySelectorAll('.carousel-dots span');
 dots.forEach((dot, idx) => {
-dot.addEventListener('click', () => {
-dots.forEach(d => d.classList.remove('active'));
-dot.classList.add('active');
+  dot.addEventListener('click', () => {
+    dots.forEach(d => d.classList.remove('active'));
+    dot.classList.add('active');
+  });
 });
-})
 </script>
+
