@@ -106,9 +106,9 @@ margin-left:0;
 }
 </style>
 
-<!-- ✅ 通栏视差视频模块，放在container外面，撑满屏幕左右 -->
+<!-- 通栏视差模块 -->
 <style>
-/* 通栏外层 */
+/* 通栏外层容器，固定高度，溢出隐藏 */
 .parallax-wrap{
 width:100vw;
 overflow:hidden;
@@ -116,15 +116,16 @@ position:relative;
 height:380px;
 margin:40px 0 60px;
 }
-/* 视差视频层 */
+/* 视频层：加高尺寸，方便上下视差移动，取消top定位，改用transform控制 */
 .bg-video{
 width:100vw;
 height:calc(100% + 120px);
 object-fit: cover;
 display:block;
 position:absolute;
-top:-60px;
 left:0;
+/* GPU加速 */
+transform: translateZ(0);
 will-change: transform;
 }
 .carousel-dots {
@@ -184,7 +185,6 @@ height:220px;
 }
 .bg-video{
 height:calc(100% + 80px);
-top:-40px;
 }
 }
 </style>
@@ -194,7 +194,7 @@ top:-40px;
 <p>{{ site.description }}</p>
 </div>
 
-<!-- 通栏视差视频 -->
+<!-- 通栏视频区域 -->
 <div class="parallax-wrap">
 <video class="bg-video" autoplay muted loop playsinline preload="auto">
   <source src="{{ site.baseurl }}/assets/jeep-field-blue.mp4" type="video/mp4">
@@ -212,7 +212,7 @@ top:-40px;
 </div>
 </div>
 
-<!-- 文章内容，保持原有1100px容器宽度 -->
+<!-- 文章列表保持1100px容器 -->
 <div class="container">
 <div class="posts-timeline">
     {% assign postsByYear = site.posts | group_by_exp: "post", "post.date | date: '%Y'" %}
@@ -258,7 +258,7 @@ document.getElementById('carouselTime').innerText = `${weekday} ${hours}:${mins}
 updateCarouselTime();
 setInterval(updateCarouselTime,1000);
 
-// ===== 打字机 LIFE IS SHORT，页面载入只执行一次，无音效 =====
+// ===== 打字机 LIFE IS SHORT，页面载入只执行一次 =====
 const targetStr = "LIFE IS SHORT";
 const el = document.getElementById('typeText');
 let idx = 0;
@@ -271,18 +271,33 @@ setTimeout(typeWriter,120);
 }
 typeWriter();
 
-// ===== 视差滚动逻辑 =====
+// ===== 修复后的视差滚动逻辑，使用requestAnimationFrame =====
 const videoBg = document.querySelector('.bg-video');
 const parallaxWrap = document.querySelector('.parallax-wrap');
-function parallaxEffect(){
+// 视差强度，数值越大拉动越强，推荐 0.2~0.4
+const parallaxStrength = 0.3;
+
+function updateParallax(){
   const rect = parallaxWrap.getBoundingClientRect();
-  const scrollPercent = -rect.top / window.innerHeight;
-  const moveY = scrollPercent * 60; // 数字越大，视差拉动越强
-  videoBg.style.transform = `translateY(${moveY}px)`;
+  // 元素在视口中的位置，计算位移
+  const scrollY = rect.top;
+  let moveY = scrollY * parallaxStrength;
+  // 限制位移范围，防止黑边
+  const maxMove = 60;
+  moveY = Math.max(-maxMove, Math.min(moveY, maxMove));
+  videoBg.style.transform = `translateY(${moveY}px) translateZ(0)`;
 }
-window.addEventListener('scroll',parallaxEffect);
-window.addEventListener('resize',parallaxEffect);
-parallaxEffect();
+
+// 使用requestAnimationFrame，保证流畅渲染
+function parallaxLoop(){
+  updateParallax();
+  requestAnimationFrame(parallaxLoop);
+}
+parallaxLoop();
+
+// 监听滚动、窗口大小，passive提升移动端性能
+window.addEventListener('scroll', updateParallax, { passive:true });
+window.addEventListener('resize', updateParallax);
 
 // ===== 圆点点击逻辑 =====
 const wrap = document.querySelector('.parallax-wrap');
