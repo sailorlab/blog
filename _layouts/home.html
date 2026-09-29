@@ -83,6 +83,21 @@ max-width:1100px;
 margin:0px auto;
 padding:0 20px;
 }
+.loadmore-wrap{
+text-align:center;
+margin:50px 0;
+}
+#loadMoreBtn {
+padding:10px 24px;
+border:1px solid #ddd;
+background:#fff;
+cursor:pointer;
+border-radius:2px;
+transition:0.2s;
+}
+#loadMoreBtn:hover{
+background:#f7f7f7;
+}
 @media (max-width:640px) {
 .timeline-year-group {
 grid-template-columns: 1fr;
@@ -216,12 +231,21 @@ height:calc(100% + 150px);
 </div>
 </div>
 <div class="container">
-<div class="posts-timeline">
-    {% assign postsByYear = site.posts | group_by_exp: "post", "post.date | date: '%Y'" %}
-    {% for year in postsByYear %}
-<div class="timeline-year-group">
-<h2 class="timeline-year">{{ year.name }}</h2>
-    {% for post in year.items %}
+<div class="posts-timeline" id="postContainer">
+{% assign allPosts = site.posts %}
+{% assign initialCount = 6 %}
+{% for post in allPosts limit:initialCount %}
+{% assign currentYear = post.date | date: '%Y' %}
+{% if forloop.first %}
+<div class="timeline-year-group" data-year="{{currentYear}}">
+<h2 class="timeline-year">{{ currentYear }}</h2>
+{% endif %}
+{% assign nextYear = allPosts[forloop.index].date | date: '%Y' %}
+{% if currentYear != nextYear and forloop.index < allPosts.size %}
+</div>
+<div class="timeline-year-group" data-year="{{nextYear}}">
+<h2 class="timeline-year">{{ nextYear }}</h2>
+{% endif %}
 <div class="post-card">
   {% if post.thumbnail %}
 <img class="post-card-thumb" src="{{ site.baseurl }}{{ post.thumbnail }}" alt="{{ post.title }}">
@@ -242,11 +266,16 @@ height:calc(100% + 150px);
 {% endif %}
 </div>
 </div>
-    {% endfor %}
+{% endfor %}
 </div>
-    {% endfor %}
+
+{% if allPosts.size > initialCount %}
+<div class="loadmore-wrap">
+<button id="loadMoreBtn">加载更多文章</button>
 </div>
+{% endif %}
 </div>
+
 <script>
 const timeDom = document.getElementById('carouselTime');
 
@@ -255,7 +284,6 @@ function updateTime(){
     const weekday = now.toLocaleDateString('en-US',{weekday:'long'});
     const hh = String(now.getHours()).padStart(2, '0');
     const mm = String(now.getMinutes()).padStart(2, '0');
-    //纯静态文本渲染，无任何翻牌DOM结构
     timeDom.innerText = `${weekday} ${hh}:${mm}`;
 }
 updateTime();
@@ -301,5 +329,57 @@ dot.addEventListener('click', () => {
 dots.forEach(d => d.classList.remove('active'));
 dots[idx].classList.add('active');
 });
+})
+
+// ========= 加载更多文章 JS =========
+const allPosts = [
+{% for p in site.posts %}
+{
+title: "{{p.title | escape}}",
+url: "{{p.url}}",
+thumbnail: "{{p.thumbnail}}",
+date: "{{p.date | date:'%m-%d'}}",
+year: "{{p.date | date:'%Y'}}",
+tags: [{% for t in p.tags %}"{{t}}",{% endfor %}]
+},
+{% endfor %}
+];
+let showCount = 6;
+const addNum = 6;
+const container = document.getElementById('postContainer');
+const btn = document.getElementById('loadMoreBtn');
+
+btn.addEventListener('click',()=>{
+  showCount += addNum;
+  container.innerHTML = '';
+  let lastYear = '';
+  for(let i=0; i<showCount; i++){
+    if(!allPosts[i]) break;
+    const p = allPosts[i];
+    if(lastYear !== p.year){
+      if(lastYear) container.innerHTML += `</div>`;
+      container.innerHTML += `<div class="timeline-year-group"><h2 class="timeline-year">${p.year}</h2>`;
+      lastYear = p.year;
+    }
+    let thumbHtml = p.thumbnail ? `<img class="post-card-thumb" src="{{site.baseurl}}${p.thumbnail}" alt="${p.title}">` : `<div class="post-card-thumb" style="background:#f5f5f5;"></div>`;
+    let tagHtml = '';
+    if(p.tags.length>0){
+      tagHtml = `<div class="post-card-tags">${p.tags.map(t=>`<span>#${t}</span>`).join(' ')}</div>`;
+    }
+    container.innerHTML += `
+      <div class="post-card">
+        ${thumbHtml}
+        <div class="post-card-text">
+          <div class="post-card-date">${p.date}</div>
+          <div class="post-card-title"><a href="{{site.baseurl}}${p.url}">${p.title}</a></div>
+          ${tagHtml}
+        </div>
+      </div>
+    `;
+  }
+  if(lastYear) container.innerHTML += `</div>`;
+  if(showCount >= allPosts.length){
+    btn.style.display = 'none';
+  }
 })
 </script>
