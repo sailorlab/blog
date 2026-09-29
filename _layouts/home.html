@@ -113,7 +113,6 @@ position:relative;
 height:450px;
 margin:40px 0 60px;
 }
-/* 底层海报图片：负责视差滚动 */
 .parallax-bg-img{
 width:100vw;
 height:calc(100% + 120px);
@@ -125,7 +124,6 @@ top:0;
 transform: translateZ(0);
 will-change: transform;
 }
-/* 上层视频：固定不动，不参与视差 */
 .bg-video{
 width:100vw;
 height:100%;
@@ -180,7 +178,6 @@ font-size: clamp(16px, 12vw, 80px);
 line-height:1;
 display:flex;
 align-items:center;
-gap: 2px; /* 给数字之间基础间距 */
 }
 .carousel-time-text .type-sub {
 color:#ffffff;
@@ -189,6 +186,58 @@ font-size:20px;
 white-space:nowrap;
 text-shadow: none;
 }
+
+/* 翻牌动画：用两个外层容器做上下移入，不再依赖 overflow 截断 */
+.flip-minute {
+display:inline-flex;
+align-items:stretch;
+justify-content:center;
+vertical-align:baseline;
+}
+.flip-digit {
+position:relative;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+min-width:0.6em;
+height:1em;
+vertical-align:baseline;
+}
+.flip-digit-inner {
+position:relative;
+display:block;
+width:100%;
+height:1em;
+line-height:1;
+text-align:center;
+}
+.flip-digit-old,
+.flip-digit-new {
+position:absolute;
+left:0;
+right:0;
+top:0;
+width:100%;
+height:1em;
+line-height:1;
+text-align:center;
+will-change: transform;
+}
+.flip-digit-old {
+transform: translateY(0);
+}
+.flip-digit-new {
+transform: translateY(110%);
+}
+.flip-digit.animate .flip-digit-old {
+transform: translateY(-110%);
+transition: transform 0.42s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.flip-digit.animate .flip-digit-new {
+transform: translateY(0);
+transition: transform 0.42s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
 @media(max-width:768px){
 .parallax-wrap{
 height:350px;
@@ -203,9 +252,7 @@ height:calc(100% + 150px);
 <p>{{ site.description }}</p>
 </div>
 <div class="parallax-wrap">
-<!-- 底层海报图，视差滚动 -->
 <img class="parallax-bg-img" src="{{ site.baseurl }}/assets/jeep-poster.jpg" alt="Jeep田野蓝调">
-<!-- 上层视频固定 -->
 <video class="bg-video" autoplay muted loop playsinline preload="auto">
 <source src="{{ site.baseurl }}/assets/jeep-field-blue.mp4" type="video/mp4">
 </video>
@@ -253,17 +300,76 @@ height:calc(100% + 150px);
 </div>
 <script>
 const timeDom = document.getElementById('carouselTime');
+let prevMinute = '';
+let isFlipping = false;
+
+function getTimeParts(){
+  const now = new Date();
+  const weekday = now.toLocaleDateString('en-US', { weekday: 'long' });
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  return { weekday, hh, mm };
+}
+
+// 普通静态渲染，保证时间完整显示
+function renderStatic(weekday, hourStr, minuteStr){
+  timeDom.textContent = `${weekday} ${hourStr}:${minuteStr}`;
+  prevMinute = minuteStr;
+}
+
+// 翻牌动画渲染
+function renderFlip(weekday, hourStr, minuteStr){
+  const old0 = prevMinute[0];
+  const old1 = prevMinute[1];
+  const new0 = minuteStr[0];
+  const new1 = minuteStr[1];
+
+  const tensClass = new0 !== old0 ? 'animate' : '';
+  const unitClass = new1 !== old1 ? 'animate' : '';
+
+  timeDom.innerHTML = `
+    ${weekday} ${hourStr}:
+    <span class="flip-minute">
+      <span class="flip-digit ${tensClass}">
+        <span class="flip-digit-inner">
+          <span class="flip-digit-old">${old0}</span>
+          <span class="flip-digit-new">${new0}</span>
+        </span>
+      </span>
+      <span class="flip-digit ${unitClass}">
+        <span class="flip-digit-inner">
+          <span class="flip-digit-old">${old1}</span>
+          <span class="flip-digit-new">${new1}</span>
+        </span>
+      </span>
+    </span>
+  `;
+}
 
 function updateTime(){
-    const now = new Date();
-    const weekday = now.toLocaleDateString('en-US',{weekday:'long'});
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
-    // 直接完整渲染时间，不嵌套复杂定位标签
-    timeDom.innerText = `${weekday} ${hh}:${mm}`;
+  if(isFlipping) return;
+
+  const { weekday, hh, mm } = getTimeParts();
+
+  if(prevMinute === ''){
+    renderStatic(weekday, hh, mm);
+    return;
+  }
+
+  if(mm !== prevMinute){
+    isFlipping = true;
+    renderFlip(weekday, hh, mm);
+
+    setTimeout(() => {
+      renderStatic(weekday, hh, mm);
+      isFlipping = false;
+    }, 440);
+  }
 }
-updateTime();
-setInterval(updateTime,1000);
+
+const init = getTimeParts();
+renderStatic(init.weekday, init.hh, init.mm);
+setInterval(updateTime, 1000);
 
 // ===== 打字机 LIFE IS SHORT =====
 const targetStr = "LIFE IS SHORT";
