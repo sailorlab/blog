@@ -188,25 +188,29 @@ font-size:20px;
 white-space:nowrap;
 text-shadow: none;
 }
-/* ========== 【修复】双位独立翻牌滚动数字样式 ========== */
-.flip-digit-wrap{
-position:relative;
-overflow:hidden;
-height:1.1em; /* 调高容器高度，避免文字截断 */
+/* 分钟数字容器，取消overflow:hidden！！重点修改 */
+.min-digit {
 display:inline-block;
-vertical-align:baseline;
-margin:0 3px; /* 两个分钟数字之间增加间距 */
+position:relative;
+margin:0 4px;
+height: 1em;
+line-height:1;
 }
-.flip-digit{
+.min-digit span {
 position:absolute;
-width:100%;
-text-align:center;
 left:0;
-bottom:0;
 transition: transform 0.45s cubic-bezier(0.2, 0, 0.3, 1);
 }
-.flip-digit-up{
+.min-digit .old-num {
+}
+.min-digit .new-num {
+transform: translateY(100%);
+}
+.min-digit.animate .old-num {
 transform: translateY(-100%);
+}
+.min-digit.animate .new-num {
+transform: translateY(0);
 }
 @media(max-width:768px){
 .parallax-wrap{
@@ -276,10 +280,10 @@ let prevMinTens = "";
 let prevMinUnit = "";
 let isFlipping = false;
 
-// 渲染函数，分离分钟十位、个位，独立翻牌
+// 渲染函数
 function renderTime(weekStr, hourStr, minTens, minUnit, animate = false){
   if(!animate){
-    timeDom.innerHTML = `${weekStr} ${hourStr}:<span class="flip-digit-wrap"><span class="flip-digit">${minTens}</span></span><span class="flip-digit-wrap"><span class="flip-digit">${minUnit}</span></span>`;
+    timeDom.innerHTML = `${weekStr} ${hourStr}:<span class="min-digit"><span class="old-num">${minTens}</span></span><span class="min-digit"><span class="old-num">${minUnit}</span></span>`;
     prevMinTens = minTens;
     prevMinUnit = minUnit;
     return;
@@ -288,23 +292,23 @@ function renderTime(weekStr, hourStr, minTens, minUnit, animate = false){
   const tensChange = minTens !== prevMinTens;
   const unitChange = minUnit !== prevMinUnit;
 
-  let tensHtml = `<span class="flip-digit-wrap"><span class="flip-digit">${prevMinTens}</span>${ tensChange ? `<span class="flip-digit flip-digit-up">${minTens}</span>` : "" }</span>`;
-  let unitHtml = `<span class="flip-digit-wrap"><span class="flip-digit">${prevMinUnit}</span>${ unitChange ? `<span class="flip-digit flip-digit-up">${minUnit}</span>` : "" }</span>`;
+  let tensHtml = `<span class="min-digit ${tensChange ? 'animate' : ''}">
+    <span class="old-num">${prevMinTens}</span>
+    <span class="new-num">${minTens}</span>
+  </span>`;
+  let unitHtml = `<span class="min-digit ${unitChange ? 'animate' : ''}">
+    <span class="old-num">${prevMinUnit}</span>
+    <span class="new-num">${minUnit}</span>
+  </span>`;
 
   timeDom.innerHTML = `${weekStr} ${hourStr}:${tensHtml}${unitHtml}`;
 
   setTimeout(()=>{
-    timeDom.querySelectorAll('.flip-digit-up').forEach(el=>{
-      el.style.transform = 'translateY(0)';
-    })
-  },20);
-
-  setTimeout(()=>{
-    timeDom.innerHTML = `${weekStr} ${hourStr}:<span class="flip-digit-wrap"><span class="flip-digit">${minTens}</span></span><span class="flip-digit-wrap"><span class="flip-digit">${minUnit}</span></span>`;
+    timeDom.innerHTML = `${weekStr} ${hourStr}:<span class="min-digit"><span class="old-num">${minTens}</span></span><span class="min-digit"><span class="old-num">${minUnit}</span></span>`;
     prevMinTens = minTens;
     prevMinUnit = minUnit;
     isFlipping = false;
-  },480);
+  },450);
 }
 
 function getTimeParts(){
