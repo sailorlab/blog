@@ -84,5 +84,11 @@
 ### 📈 图片数量变多之后的备选方案
 当仓库体积接近 800MB，建议把大量配图迁移至外部免费对象存储（如 Cloudflare R2），仓库内仅保留文章封面缩略小图，文章使用外部图片链接，避免仓库体积超限。
 
-### 📊 查看仓库占用大小
+### 📊 查看仓库占用大小（新版GitHub不再在仓库设置页直接显示）
+1. API查询（浏览器打开）：`https://api.github.com/repos/sailorlab/blog`，`size`字段单位为KB，除以1024得到MB；数据存在数小时延迟。
+2. 本地仓库终端执行命令（最准确）
+```bash
+git gc
+git count-objects -vH
+
 GitHub仓库主页 → Settings → General → 页面底部查看仓库存储占用。
