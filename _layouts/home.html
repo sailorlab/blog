@@ -204,24 +204,6 @@ height:220px;
 </div>
 </div>
 <script>
-// ===== 打字机音效生成 =====
-let audioCtx;
-function initAudio(){
-if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-}
-function playTypeSound(){
-if(!audioCtx) return;
-const osc = audioCtx.createOscillator();
-const gain = audioCtx.createGain();
-osc.type = 'square';
-osc.frequency.value = 440;
-gain.gain.value = 0.04;
-osc.connect(gain);
-gain.connect(audioCtx.destination);
-osc.start();
-osc.stop(audioCtx.currentTime + 0.025);
-}
-
 // ===== 主时间更新 =====
 function updateCarouselTime(){
 const now = new Date();
@@ -233,30 +215,17 @@ document.getElementById('carouselTime').innerText = `${weekday} ${hours}:${mins}
 updateCarouselTime();
 setInterval(updateCarouselTime,1000);
 
-// ===== 打字机 LIFE IS SHORT =====
+// ===== 打字机 LIFE IS SHORT，页面载入只执行一次，无音效 =====
 const targetStr = "LIFE IS SHORT";
 const el = document.getElementById('typeText');
 let idx = 0;
-let isDel = false;
 function typeWriter(){
-initAudio();
-if(!isDel){
+if(idx < targetStr.length){
 el.textContent = targetStr.substring(0, idx+1);
-playTypeSound();
 idx++;
-if(idx >= targetStr.length){
-isDel = true;
-setTimeout(typeWriter, 2000);
-return;
+setTimeout(typeWriter,120);
 }
-}else{
-el.textContent = targetStr.substring(0, idx-1);
-idx--;
-if(idx <= 0){
-isDel = false;
-}
-}
-setTimeout(typeWriter, isDel ? 60 : 120);
+// 打完停止，不再循环
 }
 typeWriter();
 
