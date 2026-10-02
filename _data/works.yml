@@ -1,0 +1,75 @@
+# ── Site Settings ──
+title: 破晓PO.XIAO
+email: 308211478+sailorlab@users.noreply.github.com
+author: sailorlab
+description: >-
+  <b>一个独立工作者的备忘录</b><br>
+  LIFE IS SHORT. 寻找属于自己的发光方式
+url: "https://sailorlab.github.io"
+baseurl: "/blog"
+language: zh-CN
+
+# ── Permalink 文章链接规则 ──
+permalink: /:year/:month/:day/:slug/
+
+# ── 分页配置（PaperMod必须） ──
+paginate: 10
+paginate_path: "/page/:num/"
+
+# ── Plugins Github Pages白名单内插件 ──
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-paginate
+
+# ── Build ──
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# 排除不需要参与构建的文件
+exclude:
+  - generate.py
+  - articles/
+  - README.md
+  - Gemfile.lock
+  - vendor/
+
+# 开启文章目录、搜索、归档等功能
+params:
+  env: production # production / development
+  titleMode: normal
+  defaultTheme: auto # auto / light / dark
+  disableThemeToggle: false
+  ShowReadingTime: true
+  ShowPostNavLinks: true
+  ShowBreadCrumbs: true
+  ShowCodeCopyButtons: true
+  ShowWordCount: true
+  ShowRssButtonInSectionTermList: true
+  useHugoToc: true
+  disableSpecial1stPost: false
+  disableScrollToTop: false
+  comments: false # 后面想加评论（Giscus）再打开
+  hidemeta: false
+  hideSummary: false
+  showtoc: true
+  tocopen: false
+
+# 导航菜单
+menu:
+  main:
+    - name: 首页
+      url: /
+      weight: 1
+    - name: 归档
+      url: /archives/
+      weight: 2
+    - name: 标签
+      url: /tags/
+      weight: 3
+    - name: 关于
+      url: /about/
+      weight: 4
