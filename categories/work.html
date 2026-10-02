@@ -37,6 +37,7 @@ font-size:13px;
 color:#777;
 margin-top:4px;
 }
+
 /* 图片弹窗灯箱 */
 .lightbox-overlay{
 position:fixed;
@@ -92,16 +93,24 @@ text-align:center;
 margin-top:12px;
 font-size:14px;
 }
+.lightbox-auto-tip{
+color:#cccccc;
+font-size:12px;
+text-align:center;
+margin-top:6px;
+}
+
 @media(max-width:768px){
-.works-grid{
-grid-template-columns:1fr;
-}
-.lightbox-prev,.lightbox-next{
-left:0;
-right:0;
-}
+  .works-grid{
+    grid-template-columns:1fr;
+  }
+  .lightbox-prev,.lightbox-next{
+    left:0;
+    right:0;
+  }
 }
 </style>
+
 <div class="container">
 <div class="home-intro">
 <div class="home-intro-inner">
@@ -110,21 +119,22 @@ right:0;
 </div>
 </div>
 
-<!-- 调试：输出yml读取数量，判断_data是否正常加载 -->
-<p>DEBUG‑作品总数：{{ site.data.works.size }}</p>
+<!-- 调试行，确认yml是否读取成功，上线后删掉这一行 -->
+<p>DEBUG-作品总数：{{ site.data.works.size }}</p>
 
 <div class="works-grid">
 {% for item in site.data.works %}
 <div class="work-card"
-data-work-id="{{item.id}}"
-data-img-count="{{item.image_count}}">
-<img class="work-card-thumb"
-src="{{ site.baseurl }}/assets/images/works/{{item.id}}/1.jpg"
-alt="{{ item.title }}">
-<div class="work-card-info">
-<div class="work-title">{{ item.title }}</div>
-<div class="work-desc">{{ item.desc }}</div>
-</div>
+     data-work-id="{{item.id}}"
+     data-img-count="{{item.image_count}}"
+     data-ext="{{item.ext}}">
+  <img class="work-card-thumb"
+       src="{{ site.baseurl }}/assets/images/works/{{item.id}}/1.{{item.ext}}"
+       alt="{{ item.title }}">
+  <div class="work-card-info">
+    <div class="work-title">{{ item.title }}</div>
+    <div class="work-desc">{{ item.desc }}</div>
+  </div>
 </div>
 {% endfor %}
 </div>
@@ -132,13 +142,14 @@ alt="{{ item.title }}">
 
 <!-- 图片灯箱弹窗DOM -->
 <div class="lightbox-overlay" id="lightbox">
-<div class="lightbox-wrap">
-<div class="lightbox-close" id="lbClose">×</div>
-<button class="lightbox-prev" id="lbPrev">‹</button>
-<img class="lightbox-img" id="lbImg" src="" alt="">
-<button class="lightbox-next" id="lbNext">›</button>
-<div class="lightbox-index-text" id="lbIndex"></div>
-</div>
+  <div class="lightbox-wrap">
+    <div class="lightbox-close" id="lbClose">×</div>
+    <button class="lightbox-prev" id="lbPrev">‹</button>
+    <img class="lightbox-img" id="lbImg" src="" alt="">
+    <button class="lightbox-next" id="lbNext">›</button>
+    <div class="lightbox-index-text" id="lbIndex"></div>
+    <div class="lightbox-auto-tip" id="lbAutoTip">自动播放中 · 鼠标移入暂停</div>
+  </div>
 </div>
 
 <script>
@@ -148,61 +159,117 @@ const lbClose = document.getElementById('lbClose');
 const lbPrev = document.getElementById('lbPrev');
 const lbNext = document.getElementById('lbNext');
 const lbIndex = document.getElementById('lbIndex');
+const lbAutoTip = document.getElementById('lbAutoTip');
+
 let currentWorkId = null;
 let totalImages = 0;
 let currentIndex = 0;
+let imgExt = ""; // 图片后缀，从卡片读取
 const basePath = "{{ site.baseurl }}/assets/images/works/";
+const AUTO_PLAY_INTERVAL = 3000;
+let autoPlayTimer = null;
+let isAutoPlaying = false;
+
+// 开启自动播放
+function startAutoPlay(){
+  stopAutoPlay();
+  isAutoPlaying = true;
+  lbAutoTip.textContent = "自动播放中 · 鼠标移入暂停";
+  autoPlayTimer = setInterval(()=>{
+    if(currentIndex < totalImages){
+      currentIndex++;
+    }else{
+      currentIndex = 1;
+    }
+    renderLightboxImage();
+  },AUTO_PLAY_INTERVAL);
+}
+
+// 停止自动播放
+function stopAutoPlay(){
+  if(autoPlayTimer){
+    clearInterval(autoPlayTimer);
+    autoPlayTimer = null;
+  }
+  isAutoPlaying = false;
+  lbAutoTip.textContent = "已暂停";
+}
 
 // 打开弹窗
 document.querySelectorAll('.work-card').forEach(card=>{
-card.addEventListener('click',()=>{
-currentWorkId = Number(card.dataset.workId);
-totalImages = Number(card.dataset.imgCount);
-currentIndex = 1;
-renderLightboxImage();
-lightbox.classList.add('show');
+  card.addEventListener('click',()=>{
+    currentWorkId = Number(card.dataset.workId);
+    totalImages = Number(card.dataset.imgCount);
+    imgExt = card.dataset.ext;
+    currentIndex = 1;
+    renderLightboxImage();
+    lightbox.classList.add('show');
+    startAutoPlay();
   })
 })
 
 function renderLightboxImage(){
-lbImg.src = `${basePath}${currentWorkId}/${currentIndex}.jpg`;
-lbIndex.textContent = `${currentIndex} / ${totalImages}`;
+  lbImg.src = `${basePath}${currentWorkId}/${currentIndex}.${imgExt}`;
+  lbIndex.textContent = `${currentIndex} / ${totalImages}`;
 }
 
 // 关闭弹窗
 lbClose.addEventListener('click', ()=>{
-lightbox.classList.remove('show');
+  lightbox.classList.remove('show');
+  stopAutoPlay();
 })
 lightbox.addEventListener('click',(e)=>{
-if(e.target === lightbox){
-lightbox.classList.remove('show');
+  if(e.target === lightbox){
+    lightbox.classList.remove('show');
+    stopAutoPlay();
   }
+})
+
+// 鼠标移入弹窗暂停，移出继续播放
+lightbox.addEventListener('mouseenter',()=>{
+  if(lightbox.classList.contains('show')) stopAutoPlay();
+})
+lightbox.addEventListener('mouseleave',()=>{
+  if(lightbox.classList.contains('show')) startAutoPlay();
 })
 
 // 上一张
 lbPrev.addEventListener('click',()=>{
-if(currentIndex >1){
-currentIndex--;
-renderLightboxImage();
+  stopAutoPlay();
+  if(currentIndex >1){
+    currentIndex--;
+    renderLightboxImage();
   }
 })
 // 下一张
 lbNext.addEventListener('click',()=>{
-if(currentIndex < totalImages){
-currentIndex++;
-renderLightboxImage();
+  stopAutoPlay();
+  if(currentIndex < totalImages){
+    currentIndex++;
+    renderLightboxImage();
   }
 })
 
 // 键盘左右箭头、ESC关闭
 document.addEventListener('keydown',(e)=>{
-if(!lightbox.classList.contains('show')) return;
-if(e.key === 'Escape') lightbox.classList.remove('show');
-if(e.key === 'ArrowLeft'){
-if(currentIndex>1) {currentIndex--; renderLightboxImage();}
+  if(!lightbox.classList.contains('show')) return;
+  if(e.key === 'Escape'){
+    lightbox.classList.remove('show');
+    stopAutoPlay();
   }
-if(e.key === 'ArrowRight'){
-if(currentIndex < totalImages) {currentIndex++; renderLightboxImage();}
+  if(e.key === 'ArrowLeft'){
+    stopAutoPlay();
+    if(currentIndex>1) {
+      currentIndex--;
+      renderLightboxImage();
+    }
+  }
+  if(e.key === 'ArrowRight'){
+    stopAutoPlay();
+    if(currentIndex < totalImages) {
+      currentIndex++;
+      renderLightboxImage();
+    }
   }
 })
 </script>
