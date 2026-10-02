@@ -115,12 +115,11 @@ margin-top:6px;
 <div class="home-intro">
 <div class="home-intro-inner">
 <h1>工作及其他</h1>
-<p>设计作品与摄影作品集</p>
+<p>DEBUG-作品总数：{{ site.data.works.size }}</p>
 </div>
 </div>
 
 <!-- 调试行，确认yml是否读取成功，上线后删掉这一行 -->
-<p>DEBUG-作品总数：{{ site.data.works.size }}</p>
 
 <div class="works-grid">
 {% for item in site.data.works %}
