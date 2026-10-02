@@ -1,7 +1,7 @@
 - id: 1
   title: "小月贝贝儿童餐"
   desc: "少一餐忙碌，多一刻爱的陪伴"
-  image_count: 3
+  image_count: 2
   ext: png
 - id: 2
   title: "摄影作品集"
@@ -11,6 +11,6 @@
 - id: 3
   title: "UI设计练习"
   desc: "界面设计"
-  image_count: 1
+  image_count: 2
   ext: png
 
