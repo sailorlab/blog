@@ -115,11 +115,12 @@ margin-top:6px;
 <div class="home-intro">
 <div class="home-intro-inner">
 <h1>工作及其他</h1>
-<p>Case Collection 作品总数：{{ site.data.works.size }}</p>
+<p>设计作品与摄影作品集</p>
 </div>
 </div>
 
-<!-- 调试行，确认yml是否读取成功，上线后删掉这一行 -->
+<!-- 调试信息，永久保留，方便维护 -->
+<p>DEBUG-作品总数：{{ site.data.works.size }}</p>
 
 <div class="works-grid">
 {% for item in site.data.works %}
@@ -204,6 +205,11 @@ document.querySelectorAll('.work-card').forEach(card=>{
     renderLightboxImage();
     lightbox.classList.add('show');
     startAutoPlay();
+    // 新增标记：弹窗刚打开，300ms内屏蔽mouseenter暂停
+    lightbox.dataset.justOpened = "1";
+    setTimeout(()=>{
+      lightbox.dataset.justOpened = "";
+    },300);
   })
 })
 
@@ -211,6 +217,16 @@ function renderLightboxImage(){
   lbImg.src = `${basePath}${currentWorkId}/${currentIndex}.${imgExt}`;
   lbIndex.textContent = `${currentIndex} / ${totalImages}`;
 }
+
+// 鼠标移入弹窗暂停，增加冷却判断：刚打开时不触发
+lightbox.addEventListener('mouseenter',()=>{
+  if(lightbox.classList.contains('show') && lightbox.dataset.justOpened !== "1"){
+    stopAutoPlay();
+  }
+})
+lightbox.addEventListener('mouseleave',()=>{
+  if(lightbox.classList.contains('show')) startAutoPlay();
+})
 
 // 关闭弹窗
 lbClose.addEventListener('click', ()=>{
@@ -222,14 +238,6 @@ lightbox.addEventListener('click',(e)=>{
     lightbox.classList.remove('show');
     stopAutoPlay();
   }
-})
-
-// 鼠标移入弹窗暂停，移出继续播放
-lightbox.addEventListener('mouseenter',()=>{
-  if(lightbox.classList.contains('show')) stopAutoPlay();
-})
-lightbox.addEventListener('mouseleave',()=>{
-  if(lightbox.classList.contains('show')) startAutoPlay();
 })
 
 // 上一张
