@@ -6,139 +6,139 @@ permalink: /categories/work/
 <style>
 /* 本页面独有样式：作品卡片 + 图片弹窗轮播 */
 .works-grid{
-  display: grid;
-  grid-template-columns: repeat(2,1fr);
-  gap:30px;
-  width:100%;
+display: grid;
+grid-template-columns: repeat(2,1fr);
+gap:30px;
+width:100%;
 }
 .work-card{
-  cursor: pointer;
+cursor: pointer;
 }
 .work-card-thumb{
-  width:100%;
-  aspect‑ratio:16 / 9;
-  object‑fit:cover;
-  border‑radius:4px;
-  transition:0.24s;
+width:100%;
+aspect-ratio:16 / 9;
+object-fit:cover;
+border-radius:4px;
+transition:0.24s;
 }
 .work-card:hover .work-card-thumb{
-  transform: translateY(-4px);
+transform: translateY(-4px);
 }
 .work-card-info{
-  margin‑top:12px;
+margin-top:12px;
 }
-.work‑title{
-  font‑size:16px;
-  font‑weight:500;
-  color:#222;
+.work-title{
+font-size:16px;
+font-weight:500;
+color:#222;
 }
-.work‑desc{
-  font‑size:13px;
-  color:#777;
-  margin‑top:4px;
+.work-desc{
+font-size:13px;
+color:#777;
+margin-top:4px;
 }
-
 /* 图片弹窗灯箱 */
-.lightbox‑overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.88);
-  z‑index:9999;
-  display:none;
-  align‑items:center;
-  justify‑content:center;
-  padding:20px;
+.lightbox-overlay{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.88);
+z-index:9999;
+display:none;
+align-items:center;
+justify-content:center;
+padding:20px;
 }
-.lightbox‑overlay.show{
-  display:flex;
+.lightbox-overlay.show{
+display:flex;
 }
-.lightbox‑wrap{
-  position:relative;
-  max‑width:90vw;
-  max‑height:90vh;
+.lightbox-wrap{
+position:relative;
+max-width:90vw;
+max-height:90vh;
 }
-.lightbox‑img{
-  max‑width:90vw;
-  max‑height:85vh;
-  object‑fit:contain;
+.lightbox-img{
+max-width:90vw;
+max-height:85vh;
+object-fit:contain;
 }
-.lightbox‑close{
-  position:absolute;
-  top:‑40px;
-  right:0;
-  color:#fff;
-  font‑size:28px;
-  cursor:pointer;
+.lightbox-close{
+position:absolute;
+top:-40px;
+right:0;
+color:#fff;
+font-size:28px;
+cursor:pointer;
 }
-.lightbox‑prev, .lightbox‑next{
-  position:absolute;
-  top:50%;
-  transform:translateY(-50%);
-  color:#fff;
-  font‑size:36px;
-  background:transparent;
-  border:none;
-  cursor:pointer;
-  padding:0 12px;
+.lightbox-prev, .lightbox-next{
+position:absolute;
+top:50%;
+transform:translateY(-50%);
+color:#fff;
+font-size:36px;
+background:transparent;
+border:none;
+cursor:pointer;
+padding:0 12px;
 }
-.lightbox‑prev{
-  left:‑50px;
+.lightbox-prev{
+left:-50px;
 }
-.lightbox‑next{
-  right:‑50px;
+.lightbox-next{
+right:-50px;
 }
-.lightbox‑index‑text{
-  color:#fff;
-  text‑align:center;
-  margin‑top:12px;
-  font‑size:14px;
+.lightbox-index-text{
+color:#fff;
+text-align:center;
+margin-top:12px;
+font-size:14px;
 }
-
-@media(max‑width:768px){
-  .works‑grid{
-    grid‑template‑columns:1fr;
-  }
-  .lightbox‑prev,.lightbox‑next{
-    left:0;
-    right:0;
-  }
+@media(max-width:768px){
+.works-grid{
+grid-template-columns:1fr;
+}
+.lightbox-prev,.lightbox-next{
+left:0;
+right:0;
+}
 }
 </style>
-
 <div class="container">
-<div class="home‑intro">
-  <div class="home‑intro‑inner">
-    <h1>工作及其他</h1>
-    <p>设计作品与摄影作品集</p>
-  </div>
+<div class="home-intro">
+<div class="home-intro-inner">
+<h1>工作及其他</h1>
+<p>设计作品与摄影作品集</p>
+</div>
 </div>
 
-<div class="works‑grid">
+<!-- 调试：输出yml读取数量，判断_data是否正常加载 -->
+<p>DEBUG‑作品总数：{{ site.data.works.size }}</p>
+
+<div class="works-grid">
 {% for item in site.data.works %}
-<div class="work‑card"
-     data‑work‑id="{{item.id}}"
-     data‑img‑count="{{item.image_count}}">
-  <img class="work‑card‑thumb"
-       src="{{ site.baseurl }}/assets/images/works/{{item.id}}/1.jpg"
-       alt="{{ item.title }}">
-  <div class="work‑card‑info">
-    <div class="work‑title">{{ item.title }}</div>
-    <div class="work‑desc">{{ item.desc }}</div>
-  </div>
+<div class="work-card"
+data-work-id="{{item.id}}"
+data-img-count="{{item.image_count}}">
+<img class="work-card-thumb"
+src="{{ site.baseurl }}/assets/images/works/{{item.id}}/1.jpg"
+alt="{{ item.title }}">
+<div class="work-card-info">
+<div class="work-title">{{ item.title }}</div>
+<div class="work-desc">{{ item.desc }}</div>
+</div>
 </div>
 {% endfor %}
 </div>
 </div>
 
 <!-- 图片灯箱弹窗DOM -->
-<div class="lightbox‑overlay" id="lightbox">
-  <div class="lightbox‑wrap">
-    <div class="lightbox‑close" id="lbClose">×</div>
-    <button class="lightbox‑prev" id="lbPrev">‹</button>
-    <img class="lightbox‑img" id="lbImg" src="" alt="">
-    <button class="lightbox‑next" id="lbNext">›</button>
-    <div class="lightbox‑index‑text" id="lbIndex"></div>
-  </div>
+<div class="lightbox-overlay" id="lightbox">
+<div class="lightbox-wrap">
+<div class="lightbox-close" id="lbClose">×</div>
+<button class="lightbox-prev" id="lbPrev">‹</button>
+<img class="lightbox-img" id="lbImg" src="" alt="">
+<button class="lightbox-next" id="lbNext">›</button>
+<div class="lightbox-index-text" id="lbIndex"></div>
+</div>
 </div>
 
 <script>
@@ -148,62 +148,61 @@ const lbClose = document.getElementById('lbClose');
 const lbPrev = document.getElementById('lbPrev');
 const lbNext = document.getElementById('lbNext');
 const lbIndex = document.getElementById('lbIndex');
-
 let currentWorkId = null;
 let totalImages = 0;
 let currentIndex = 0;
 const basePath = "{{ site.baseurl }}/assets/images/works/";
 
 // 打开弹窗
-document.querySelectorAll('.work‑card').forEach(card=>{
-  card.addEventListener('click',()=>{
-    currentWorkId = Number(card.dataset.workId);
-    totalImages = Number(card.dataset.imgCount);
-    currentIndex = 1;
-    renderLightboxImage();
-    lightbox.classList.add('show');
+document.querySelectorAll('.work-card').forEach(card=>{
+card.addEventListener('click',()=>{
+currentWorkId = Number(card.dataset.workId);
+totalImages = Number(card.dataset.imgCount);
+currentIndex = 1;
+renderLightboxImage();
+lightbox.classList.add('show');
   })
 })
 
 function renderLightboxImage(){
-  lbImg.src = `${basePath}${currentWorkId}/${currentIndex}.jpg`;
-  lbIndex.textContent = `${currentIndex} / ${totalImages}`;
+lbImg.src = `${basePath}${currentWorkId}/${currentIndex}.jpg`;
+lbIndex.textContent = `${currentIndex} / ${totalImages}`;
 }
 
 // 关闭弹窗
 lbClose.addEventListener('click', ()=>{
-  lightbox.classList.remove('show');
+lightbox.classList.remove('show');
 })
 lightbox.addEventListener('click',(e)=>{
-  if(e.target === lightbox){
-    lightbox.classList.remove('show');
+if(e.target === lightbox){
+lightbox.classList.remove('show');
   }
 })
 
 // 上一张
 lbPrev.addEventListener('click',()=>{
-  if(currentIndex >1){
-    currentIndex‑‑;
-    renderLightboxImage();
+if(currentIndex >1){
+currentIndex--;
+renderLightboxImage();
   }
 })
 // 下一张
 lbNext.addEventListener('click',()=>{
-  if(currentIndex < totalImages){
-    currentIndex++;
-    renderLightboxImage();
+if(currentIndex < totalImages){
+currentIndex++;
+renderLightboxImage();
   }
 })
 
 // 键盘左右箭头、ESC关闭
 document.addEventListener('keydown',(e)=>{
-  if(!lightbox.classList.contains('show')) return;
-  if(e.key === 'Escape') lightbox.classList.remove('show');
-  if(e.key === 'ArrowLeft'){
-    if(currentIndex>1) {currentIndex‑‑; renderLightboxImage();}
+if(!lightbox.classList.contains('show')) return;
+if(e.key === 'Escape') lightbox.classList.remove('show');
+if(e.key === 'ArrowLeft'){
+if(currentIndex>1) {currentIndex--; renderLightboxImage();}
   }
-  if(e.key === 'ArrowRight'){
-    if(currentIndex < totalImages) {currentIndex++; renderLightboxImage();}
+if(e.key === 'ArrowRight'){
+if(currentIndex < totalImages) {currentIndex++; renderLightboxImage();}
   }
 })
 </script>
