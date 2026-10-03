@@ -13,6 +13,7 @@ width:100%;
 }
 .work-card{
 cursor: pointer;
+position: relative; /* 给播放角标做定位容器 */
 }
 .work-card-thumb{
 width:100%;
@@ -37,7 +38,30 @@ font-size:13px;
 color:#777;
 margin-top:4px;
 }
-
+/* 视频播放角标，增加hover联动放大动画 */
+.play-badge{
+position:absolute;
+bottom:10px;
+right:10px;
+width:36px;
+height:36px;
+background:rgba(0,0,0,0.55);
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+color:#fff;
+font-size:16px;
+transition:0.24s ease;
+}
+.play-badge::after{
+content:"▶";
+margin-left:2px;
+}
+.work-card:hover .play-badge{
+transform: scale(1.15);
+background:rgba(0,0,0,0.7);
+}
 /* 图片弹窗灯箱 */
 .lightbox-overlay{
 position:fixed;
@@ -57,10 +81,11 @@ position:relative;
 max-width:90vw;
 max-height:90vh;
 }
-.lightbox-img{
+.lightbox-media{
 max-width:90vw;
 max-height:85vh;
 object-fit:contain;
+border-radius:4px;
 }
 .lightbox-close{
 position:absolute;
@@ -93,18 +118,21 @@ text-align:center;
 margin-top:12px;
 font-size:14px;
 }
-
 @media(max-width:768px){
-  .works-grid{
-    grid-template-columns:1fr;
+.works-grid{
+grid-template-columns:1fr;
   }
-  .lightbox-prev,.lightbox-next{
-    left:0;
-    right:0;
+.lightbox-prev,.lightbox-next{
+left:0;
+right:0;
   }
+.play-badge{
+width:32px;
+height:32px;
+font-size:14px;
+}
 }
 </style>
-
 <div class="container">
 <div class="home-intro">
 <div class="home-intro-inner">
@@ -112,110 +140,120 @@ font-size:14px;
 <p>Case Collection 作品总数：{{ site.data.works.size }}</p>
 </div>
 </div>
-
 <!-- 调试信息，永久保留，方便维护 -->
-
 <div class="works-grid">
 {% for item in site.data.works %}
 <div class="work-card"
-     data-work-id="{{item.id}}"
-     data-img-count="{{item.image_count}}"
-     data-ext="{{item.ext}}">
-  <img class="work-card-thumb"
-       src="{{ site.baseurl }}/assets/images/works/{{item.id}}/1.{{item.ext}}"
-       alt="{{ item.title }}">
-  <div class="work-card-info">
-    <div class="work-title">{{ item.title }}</div>
-    <div class="work-desc">{{ item.desc }}</div>
-  </div>
+data-work-id="{{item.id}}"
+data-media-count="{{item.media_count}}"
+data-ext="{{item.ext}}"
+data-media-type="{{item.media_type}}">
+<img class="work-card-thumb"
+src="{{ site.baseurl }}/assets/images/works/{{item.id}}/1.jpg"
+alt="{{ item.title }}">
+{% if item.media_type == 'video' %}
+<div class="play-badge"></div>
+{% endif %}
+<div class="work-card-info">
+<div class="work-title">{{ item.title }}</div>
+<div class="work-desc">{{ item.desc }}</div>
+</div>
 </div>
 {% endfor %}
 </div>
 </div>
-
-<!-- 图片灯箱弹窗DOM -->
+<!-- 灯箱弹窗DOM，把img替换成容器lightbox-media -->
 <div class="lightbox-overlay" id="lightbox">
-  <div class="lightbox-wrap">
-    <div class="lightbox-close" id="lbClose">×</div>
-    <button class="lightbox-prev" id="lbPrev">‹</button>
-    <img class="lightbox-img" id="lbImg" src="" alt="">
-    <button class="lightbox-next" id="lbNext">›</button>
-    <div class="lightbox-index-text" id="lbIndex"></div>
-  </div>
+<div class="lightbox-wrap">
+<div class="lightbox-close" id="lbClose">×</div>
+<button class="lightbox-prev" id="lbPrev">‹</button>
+<div class="lightbox-media" id="lbMedia"></div>
+<button class="lightbox-next" id="lbNext">›</button>
+<div class="lightbox-index-text" id="lbIndex"></div>
 </div>
-
+</div>
 <script>
 const lightbox = document.getElementById('lightbox');
-const lbImg = document.getElementById('lbImg');
+const lbMedia = document.getElementById('lbMedia');
 const lbClose = document.getElementById('lbClose');
 const lbPrev = document.getElementById('lbPrev');
 const lbNext = document.getElementById('lbNext');
 const lbIndex = document.getElementById('lbIndex');
-
 let currentWorkId = null;
-let totalImages = 0;
+let totalMedia = 0;
 let currentIndex = 0;
-let imgExt = "";
+let mediaExt = "";
+let mediaType = "";
 const basePath = "{{ site.baseurl }}/assets/images/works/";
 
 // 打开弹窗
 document.querySelectorAll('.work-card').forEach(card=>{
-  card.addEventListener('click',()=>{
-    currentWorkId = Number(card.dataset.workId);
-    totalImages = Number(card.dataset.imgCount);
-    imgExt = card.dataset.ext;
-    currentIndex = 1;
-    renderLightboxImage();
-    lightbox.classList.add('show');
+card.addEventListener('click',()=>{
+currentWorkId = Number(card.dataset.workId);
+totalMedia = Number(card.dataset.mediaCount);
+mediaExt = card.dataset.ext;
+mediaType = card.dataset.mediaType;
+currentIndex = 1;
+renderLightbox();
+lightbox.classList.add('show');
   })
 })
 
-function renderLightboxImage(){
-  lbImg.src = `${basePath}${currentWorkId}/${currentIndex}.${imgExt}`;
-  lbIndex.textContent = `${currentIndex} / ${totalImages}`;
+function renderLightbox(){
+  const src = `${basePath}${currentWorkId}/${currentIndex}.${mediaExt}`;
+  if(mediaType === 'video'){
+    lbMedia.innerHTML = `<video class="lightbox-media" controls preload="metadata" playsinline src="${src}"></video>`;
+  }else{
+    lbMedia.innerHTML = `<img class="lightbox-media" src="${src}" alt="">`;
+  }
+  lbIndex.textContent = `${currentIndex} / ${totalMedia}`;
 }
 
 // 关闭弹窗
 lbClose.addEventListener('click', ()=>{
-  lightbox.classList.remove('show');
+lightbox.classList.remove('show');
+// 关闭时暂停视频，防止后台继续播放
+lbMedia.innerHTML = '';
 })
 lightbox.addEventListener('click',(e)=>{
-  if(e.target === lightbox){
-    lightbox.classList.remove('show');
+if(e.target === lightbox){
+lightbox.classList.remove('show');
+lbMedia.innerHTML = '';
   }
 })
 
 // 上一张
 lbPrev.addEventListener('click',()=>{
-  if(currentIndex >1){
-    currentIndex--;
-    renderLightboxImage();
+if(currentIndex >1){
+currentIndex--;
+renderLightbox();
   }
 })
 // 下一张
 lbNext.addEventListener('click',()=>{
-  if(currentIndex < totalImages){
-    currentIndex++;
-    renderLightboxImage();
+if(currentIndex < totalMedia){
+currentIndex++;
+renderLightbox();
   }
 })
 
 // 键盘左右箭头、ESC关闭
 document.addEventListener('keydown',(e)=>{
-  if(!lightbox.classList.contains('show')) return;
-  if(e.key === 'Escape'){
-    lightbox.classList.remove('show');
+if(!lightbox.classList.contains('show')) return;
+if(e.key === 'Escape'){
+lightbox.classList.remove('show');
+lbMedia.innerHTML = '';
   }
-  if(e.key === 'ArrowLeft'){
-    if(currentIndex>1) {
-      currentIndex--;
-      renderLightboxImage();
+if(e.key === 'ArrowLeft'){
+if(currentIndex>1) {
+currentIndex--;
+renderLightbox();
     }
   }
-  if(e.key === 'ArrowRight'){
-    if(currentIndex < totalImages) {
-      currentIndex++;
-      renderLightboxImage();
+if(e.key === 'ArrowRight'){
+if(currentIndex < totalMedia) {
+currentIndex++;
+renderLightbox();
     }
   }
 })
