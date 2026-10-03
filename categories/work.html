@@ -148,9 +148,16 @@ data-work-id="{{item.id}}"
 data-media-count="{{item.media_count}}"
 data-ext="{{item.ext}}"
 data-media-type="{{item.media_type}}">
+{% if item.media_type == 'video' %}
 <img class="work-card-thumb"
 src="{{ site.baseurl }}/assets/images/works/{{item.id}}/1.jpg"
 alt="{{ item.title }}">
+{% else %}
+<img class="work-card-thumb"
+src="{{ site.baseurl }}/assets/images/works/{{item.id}}/1.{{item.ext}}"
+alt="{{ item.title }}">
+{% endif %}
+
 {% if item.media_type == 'video' %}
 <div class="play-badge"></div>
 {% endif %}
