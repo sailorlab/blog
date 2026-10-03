@@ -1,17 +1,14 @@
 - id: 1
   title: "小月贝贝儿童餐"
   desc: "少一餐忙碌，多一刻爱的陪伴"
-  image_count: 2
+  media_count: 2
   ext: png
+  media_type: image
+
+# 视频项目例子
 - id: 2
-  title: "伴手礼"
-  desc: "下午茶伴手礼盒"
+  title: "DOUX RÊVE"
+  desc: "下午茶伴手礼盒系列"
   media_count: 1
   ext: mp4
   media_type: video
-- id: 3
-  title: "UI设计练习"
-  desc: "界面设计"
-  image_count: 2
-  ext: png
-
