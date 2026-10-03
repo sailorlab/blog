@@ -6,7 +6,7 @@
 - id: 2
   title: "伴手礼"
   desc: "下午茶伴手礼盒"
-  image_count: 1
+  media_count: 1
   ext: mp4
   media_type: video
 - id: 3
