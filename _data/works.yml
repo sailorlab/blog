@@ -11,3 +11,10 @@
   media_count: 1
   ext: mp4
   media_type: video
+
+- id: 3
+  title: "山姆会员超市"
+  desc: "青提艾尔啤酒"
+  media_count: 4
+  ext: jpg
+  media_type: image
