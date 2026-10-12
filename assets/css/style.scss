@@ -63,9 +63,11 @@ body {
 
 /* Layout Container */
 .container {
-  max-width: 960px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Header */
@@ -77,7 +79,7 @@ body {
   -webkit-backdrop-filter: blur(10px);
   background-color: var(--header-bg);
   border-bottom: 1px solid var(--border-color);
-  padding: 1.25rem 0;
+  padding: 4rem 0;
   
   .header-container {
     display: flex;
@@ -121,7 +123,7 @@ body {
 
 /* Main Content Wrapper */
 .main {
-  padding: 4rem 0 6rem 0;
+  padding: 6rem 0 6rem 0;
 }
 
 /* Home Layout: Intro & Timeline */
@@ -130,7 +132,7 @@ body {
   max-width: 680px;
   
   h1 {
-    font-size: 2.5rem;
+    font-size: 22px;
     font-weight: 700;
     color: var(--accent-color);
     margin-bottom: 1rem;
@@ -139,7 +141,7 @@ body {
   }
   
   p {
-    font-size: 1.2rem;
+    font-size: 14.4px;
     color: var(--text-muted);
     font-weight: 300;
     line-height: 1.6;
@@ -147,19 +149,20 @@ body {
 }
 
 .posts-timeline {
-  max-width: 680px;
+  max-width: unset;
+  width:100%;
 
   .timeline-year-group {
     margin-bottom: 3rem;
   }
   
   .timeline-year {
-    font-size: 1.5rem;
+    font-size: 22px;
     font-weight: 700;
     color: var(--accent-color);
-    margin-bottom: 1.25rem;
+    margin-bottom: 0rem;
     border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.5rem;
+    padding-bottom: 2rem;
     letter-spacing: -0.01em;
   }
   
@@ -262,7 +265,7 @@ body {
   gap: 3.5rem;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0rem;
   
   @media (max-width: 1140px) {
     grid-template-columns: 1fr;
@@ -456,6 +459,7 @@ body {
   
   p {
     margin-bottom: 1.5rem;
+    text-align: justify;
   }
   
   h2, h3, h4, h5, h6 {
@@ -624,7 +628,7 @@ body {
   border-top: 1px solid var(--border-color);
   padding: 4.5rem 0;
   text-align: center;
-  font-size: 0.88rem;
+  font-size: 12px;
   color: var(--text-muted);
   
   .footer-container {
@@ -634,7 +638,7 @@ body {
   }
   
   .footer-desc {
-    font-size: 0.85rem;
+    font-size: 12pxrem;
     max-width: 500px;
     margin: 0 auto;
   }
@@ -670,4 +674,67 @@ body {
   /* Name.Variable */ .nv { color: #ffab70; }
   /* Literal.String */ .s, .sa, .sb, .sc, .dl, .sd, .s2, .se, .sh, .si, .sx, .sr, .s1, .ss { color: #9ecbff; }
   /* Literal.Number */ .m, .mb, .mdf, .me, .mf, .mh, .mi, .il, .ip, .ix, .mo { color: #79b8ff; }
+}
+/* ========== 全站文章卡片统一样式 左缩略图｜右侧右对齐文字 ========== */
+.post-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 40px 0;
+  border-bottom: 1px solid #e5e5e5;
+  transition: all 0.24s ease;
+}
+.post-card:hover {
+  transform: translateY(-2px);
+}
+.post-card-thumb {
+  width:140px;
+  height:100px;
+  object-fit: cover;
+  object-position: center center;
+  border-radius:4px;
+  flex-shrink:0;
+  overflow:hidden;
+}
+.post-card-text {
+  text-align: right;
+  flex: none;
+  padding-top:0px;
+}
+.post-card-date {
+  color:#777;
+  font-size:12px;
+  margin-bottom: 8px;
+  line-height:1.2;
+}
+.post-card-title {
+  font-size:18px;
+  font-weight:500;
+  text-decoration:none;
+  color:#222;
+}
+.post-card-title:hover {
+  color:#4472c4;
+}
+.post-card-tags {
+  margin-top:8px;
+  font-size:12px;
+  color:#888;
+}
+.post-card-tags span {
+  margin-left:6px;
+}
+/* 移动端适配：宽度小于640px，卡片垂直排列 */
+@media (max-width: 640px) {
+  .post-card {
+    flex-direction: column;
+  }
+  .post-card-text {
+    text-align: left;
+    margin-top:12px;
+  }
+  .post-card-thumb {
+    width:100%;
+    height:160px;
+  }
 }

@@ -1,18 +1,256 @@
 ---
-layout: page
+layout: default
 title: 标签集合
-permalink: /tags/
 ---
-
-<h2>所有标签</h2>
-
-{% assign tags = site.tags | sort %}
-{% for tag in tags %}
-<h3># {{ tag[0] }}</h3>
-<ul>
-  {% for post in tag[1] %}
-  <li><a href="{{ post.url }}">{{ post.title }}</a></li>
-  {% endfor %}
-</ul>
+<style>
+/* 沿用和首页统一的容器排版 */
+.container {
+max-width: 1100px;
+margin: 0 auto;
+padding: 0 20px;
+width: 100%;
+box-sizing: border-box;
+}
+.home-intro {
+margin-bottom:60px;
+}
+.tag-cloud {
+display: flex;
+flex-wrap: wrap;
+gap:16px;
+margin-top:24px;
+margin-bottom:40px;
+}
+.tag-item {
+font-size:14.4px;
+padding:8px 16px;
+border:1px solid var(--border-color);
+border-radius:2px;
+text-decoration: none;
+color:#333;
+transition:0.2s;
+cursor:pointer;
+}
+.tag-item:hover {
+background:#222;
+color:#fff;
+border-color:#222;
+}
+/* 两列网格布局，和首页保持一致 */
+#tag-post-list {
+display: grid;
+grid-template-columns: repeat(2, 1fr);
+gap: 30px;
+}
+/* 覆盖全局680px宽度限制 */
+.posts-timeline {
+max-width: unset !important;
+width:100% !important;
+}
+.post-card {
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+padding: 40px 0;
+border-bottom: 1px solid var(--border-color);
+transition: all 0.24s ease;
+}
+.post-card:hover {
+transform: translateY(-2px);
+}
+.post-card-thumb {
+width:300px;
+height:100px;
+object-fit: cover;
+border-radius:4px;
+flex-shrink:0;
+}
+.post-card-text {
+text-align: right;
+flex: 1;
+padding-top:0px;
+padding-left:20px;
+}
+.post-card-date {
+color:#777;
+font-size:12px;
+margin-bottom: 8px;
+line-height:1.2;
+}
+.post-card-title {
+font-size:18px;
+font-weight:500;
+}
+.post-card-title a {
+color:#222;
+text-decoration:none;
+}
+.post-card-title a:hover {
+color:#000;
+text-decoration: none;
+}
+/* 卡片内标签样式 */
+.post-card-tags {
+margin-top:8px;
+font-size:12px;
+color:#888;
+}
+.post-card-tags span {
+margin-left:6px;
+}
+.loadmore-wrap{
+text-align:center;
+margin:50px 0;
+}
+#loadMoreBtn {
+padding:10px 24px;
+border:1px solid #ddd;
+background:#fff;
+cursor:pointer;
+border-radius:2px;
+transition:0.2s;
+}
+#loadMoreBtn:hover{
+background:#f7f7f7;
+}
+/* 移动端：网格变成单列 */
+@media (max-width:768px) {
+#tag-post-list {
+grid-template-columns: 1fr;
+}
+}
+@media (max-width:640px) {
+.post-card {
+flex-direction: column;
+align-items: flex-start;
+  }
+.post-card-thumb {
+width:100%;
+height:180px;
+  }
+.post-card-text {
+text-align:left;
+padding-top: 12px;
+padding-left:0;
+  }
+}
+</style>
+<div class="container">
+<div class="home-intro">
+<h1>标签集合</h1>
+<p>按标签浏览全部文章</p>
+</div>
+<div class="tag-cloud">
+{% for tag in site.tags %}
+<span class="tag-item" onclick="showTag('{{ tag[0] }}')">{{ tag[0] }} <span style="color:#888;">({{ tag[1].size }})</span></span>
 {% endfor %}
-<!-- （注：内容由AI生成） -->
+<span class="tag-item" onclick="showTag('all')">全部文章</span>
+</div>
+<div class="posts-timeline" id="tag-post-list">
+{% assign allPosts = site.posts %}
+{% assign initialCount = 6 %}
+{% for post in allPosts limit:initialCount %}
+<div class="post-card" data-tags="{{ post.tags | join:',' }}">
+  {% if post.thumbnail %}
+<img class="post-card-thumb" src="{{ site.baseurl }}{{ post.thumbnail }}" alt="{{ post.title }}">
+  {% else %}
+<div class="post-card-thumb" style="background:#f5f5f5;"></div>
+  {% endif %}
+<div class="post-card-text">
+<div class="post-card-date">{{ post.date | date:"%m-%d" }}</div>
+<div class="post-card-title">
+<a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a>
+</div>
+{% if post.tags.size > 0 %}
+<div class="post-card-tags">
+  {% for tag in post.tags %}
+<span>#{{ tag }}</span>
+  {% endfor %}
+</div>
+{% endif %}
+</div>
+</div>
+{% endfor %}
+</div>
+
+{% if allPosts.size > initialCount %}
+<div class="loadmore-wrap">
+<button id="loadMoreBtn">加载更多文章</button>
+</div>
+{% endif %}
+</div>
+
+<script>
+// 存储全部文章数据
+const tagAllPosts = [
+{% for p in site.posts %}
+{
+title: "{{p.title | escape}}",
+url: "{{p.url}}",
+thumbnail: "{{p.thumbnail}}",
+date: "{{p.date | date: '%m-%d'}}",
+tags: [{% for t in p.tags %}"{{t}}",{% endfor %}]
+},
+{% endfor %}
+];
+let showCount = 6;
+const addNum = 6;
+const container = document.getElementById('tag-post-list');
+const btn = document.getElementById('loadMoreBtn');
+let currentFilterTag = "all";
+
+// 渲染文章列表
+function renderList(){
+  container.innerHTML = '';
+  let renderPosts = [];
+  // 筛选标签
+  if(currentFilterTag === 'all'){
+    renderPosts = tagAllPosts.slice(0, showCount);
+  }else{
+    const filtered = tagAllPosts.filter(item => item.tags.includes(currentFilterTag));
+    renderPosts = filtered.slice(0, showCount);
+  }
+
+  renderPosts.forEach(p=>{
+    let thumbHtml = p.thumbnail ? `<img class="post-card-thumb" src="{{site.baseurl}}${p.thumbnail}" alt="${p.title}">` : `<div class="post-card-thumb" style="background:#f5f5f5;"></div>`;
+    let tagHtml = '';
+    if(p.tags.length>0){
+      tagHtml = `<div class="post-card-tags">${p.tags.map(t=>`<span>#${t}</span>`).join(' ')}</div>`;
+    }
+    container.innerHTML += `
+      <div class="post-card" data-tags="${p.tags.join(',')}">
+        ${thumbHtml}
+        <div class="post-card-text">
+          <div class="post-card-date">${p.date}</div>
+          <div class="post-card-title"><a href="{{site.baseurl}}${p.url}">${p.title}</a></div>
+          ${tagHtml}
+        </div>
+      </div>
+    `;
+  })
+
+  // 判断是否还有更多
+  let sourceList = currentFilterTag === 'all' ? tagAllPosts : tagAllPosts.filter(item => item.tags.includes(currentFilterTag));
+  if(showCount >= sourceList.length){
+    btn.style.display = 'none';
+  }else{
+    btn.style.display = 'block';
+  }
+}
+
+// 标签切换函数，同步重置加载数量
+function showTag(targetTag){
+  currentFilterTag = targetTag;
+  showCount = 6;
+  renderList();
+}
+
+// 加载更多点击
+btn.addEventListener('click',()=>{
+  showCount += addNum;
+  renderList();
+})
+
+// 初始渲染
+renderList();
+</script>

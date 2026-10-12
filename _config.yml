@@ -1,10 +1,10 @@
 # ── Site Settings ──
-title: 破晓
+title: 破晓PO.XIAO
 email: 308211478+sailorlab@users.noreply.github.com
 author: sailorlab
 description: >-
   <b>一个独立工作者的备忘录</b><br>
-  坚持手搓设计·写作·摄影，做一个远离AI浪潮的人，寻找属于自己的发光方式
+  LIFE IS SHORT. 寻找属于自己的发光方式
 url: "https://sailorlab.github.io"
 baseurl: "/blog"
 language: zh-CN
@@ -37,8 +37,6 @@ exclude:
   - Gemfile.lock
   - vendor/
 
-# ── PaperMod 主题基础配置 ──
-theme: minima # 如果是源码部署，删掉这一行；Gem主题保留
 # 开启文章目录、搜索、归档等功能
 params:
   env: production # production / development

@@ -1,21 +1,189 @@
 ---
-layout: page
-title: 文章归档
+layout: default
+title: 归档
 permalink: /archives/
 ---
-
-<h2>全部文章 · 按年份归档</h2>
-
-{% assign postsByYear = site.posts | group_by_exp:"post", "post.date | date: '%Y'" %}
-{% for year in postsByYear %}
-<h3>{{ year.name }}</h3>
-<ul>
-  {% for post in year.items %}
-  <li>
-    <span>{{ post.date | date:"%m‑%d" }}</span>
-    <a href="{{ post.url }}">{{ post.title }}</a>
-  </li>
-  {% endfor %}
-</ul>
+<style>
+/* 统一container最大宽度 1100px */
+.container {
+max-width: 1100px;
+margin: 0 auto;
+padding: 0 20px;
+width: 100%;
+box-sizing: border-box;
+}
+.home-intro {
+margin-bottom:60px;
+}
+.home-intro h1 {
+font-size:32px;
+margin:0 0 8px 0;
+font-weight:600;
+}
+.home-intro p {
+color:#666;
+font-size:16px;
+margin:0;
+}
+/* 和首页完全一致的两列网格 */
+.post-list {
+display: grid;
+grid-template-columns: repeat(2, 1fr);
+gap:30px;
+}
+.post-card {
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+padding:40px 0;
+border-bottom: 1px solid var(--border-color);
+transition: all 0.24s ease;
+}
+.post-card:hover {
+transform: translateY(-2px);
+}
+.post-card-thumb {
+width:300px;
+height:100px;
+object-fit: cover;
+border-radius:4px;
+flex-shrink:0;
+}
+.post-card-text {
+text-align:right;
+flex:1;
+padding-left:20px;
+}
+.post-card-date {
+font-size:12px;
+color:#777;
+margin-bottom:8px;
+}
+.post-card-title {
+font-size:18px;
+font-weight:500;
+color:#222;
+text-decoration:none;
+display:block;
+}
+.post-card-title:hover {
+color:#000;
+text-decoration:none;
+}
+.loadmore-wrap{
+text-align:center;
+margin:50px 0;
+}
+#loadMoreBtn {
+padding:10px 24px;
+border:1px solid #ddd;
+background:#fff;
+cursor:pointer;
+border-radius:2px;
+transition:0.2s;
+}
+#loadMoreBtn:hover{
+background:#f7f7f7;
+}
+/* 移动端自动单列 */
+@media (max-width:768px) {
+.post-list {
+grid-template-columns:1fr;
+}
+}
+@media (max-width:640px) {
+.post-card {
+flex-direction:column;
+}
+.post-card-thumb {
+width:100%;
+height:180px;
+margin-bottom:12px;
+}
+.post-card-text {
+text-align:left;
+padding-left:0;
+}
+}
+</style>
+<div class="container">
+<div class="home-intro">
+<h1>文章归档</h1>
+<p>全部文章归档列表</p>
+</div>
+<div class="post-list" id="postContainer">
+{% assign allPosts = site.posts %}
+{% assign initialCount = 6 %}
+{% for post in allPosts limit:initialCount %}
+<div class="post-card">
+  {% if post.thumbnail %}
+<img class="post-card-thumb" src="{{ site.baseurl }}{{ post.thumbnail }}" alt="{{ post.title }}">
+  {% else %}
+<div class="post-card-thumb" style="background:#f5f5f5;"></div>
+  {% endif %}
+<div class="post-card-text">
+<div class="post-card-date">{{ post.date | date: "%Y-%m-%d" }}</div>
+<a class="post-card-title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
+{% if post.tags.size > 0 %}
+<div style="margin-top:8px;font-size:12px;color:#888;">
+{% for tag in post.tags %}
+#{{ tag }}
 {% endfor %}
-<!-- （注：内容由AI生成） -->
+</div>
+{% endif %}
+</div>
+</div>
+{% endfor %}
+</div>
+
+{% if allPosts.size > initialCount %}
+<div class="loadmore-wrap">
+<button id="loadMoreBtn">加载更多文章</button>
+</div>
+{% endif %}
+</div>
+
+<script>
+const archivePosts = [
+{% for p in site.posts %}
+{
+title: "{{p.title | escape}}",
+url: "{{p.url}}",
+thumbnail: "{{p.thumbnail}}",
+date: "{{p.date | date: '%Y-%m-%d'}}",
+tags: [{% for t in p.tags %}"{{t}}",{% endfor %}]
+},
+{% endfor %}
+];
+let showCount = 6;
+const addNum = 6;
+const container = document.getElementById('postContainer');
+const btn = document.getElementById('loadMoreBtn');
+
+btn.addEventListener('click',()=>{
+  showCount += addNum;
+  container.innerHTML = '';
+  for(let i=0; i<showCount; i++){
+    if(!archivePosts[i]) break;
+    const p = archivePosts[i];
+    let thumbHtml = p.thumbnail ? `<img class="post-card-thumb" src="{{site.baseurl}}${p.thumbnail}" alt="${p.title}">` : `<div class="post-card-thumb" style="background:#f5f5f5;"></div>`;
+    let tagHtml = '';
+    if(p.tags.length>0){
+      tagHtml = `<div style="margin-top:8px;font-size:12px;color:#888;">${p.tags.map(t=>`#${t}`).join(' ')}</div>`;
+    }
+    container.innerHTML += `
+      <div class="post-card">
+        ${thumbHtml}
+        <div class="post-card-text">
+          <div class="post-card-date">${p.date}</div>
+          <a class="post-card-title" href="{{site.baseurl}}${p.url}">${p.title}</a>
+          ${tagHtml}
+        </div>
+      </div>
+    `;
+  }
+  if(showCount >= archivePosts.length){
+    btn.style.display = 'none';
+  }
+})
+</script>
